@@ -1,0 +1,114 @@
+//-------------------------------------------------------------------------------
+//  Vectorhash - a very fast vectorized hash function optimized for large buffers
+//
+//  Copyright (c) 2018-2025 Peter A.M. van Hoof
+//  All Rights Reserved
+//
+//  Distributed under the "zlib license". See the accompanying LICENSE file.
+//-------------------------------------------------------------------------------
+
+#ifndef VECTORHASH_PRIV_H
+#define VECTORHASH_PRIV_H
+
+#include <string>
+#include <type_traits>
+#include <cstdlib>
+#include <cstdint>
+
+using namespace std;
+
+static const string vh_version( "0.1" );
+
+//-----------------------------------------------------------------------------
+// tunable parameters
+
+// width of the hash (in bits)
+// this value MUST be a power of 2 with a minimum of 128
+#if defined(VH128)
+static const size_t vh_hash_width = 128;
+#define EXT(X) X##_128
+#elif defined(VH256)
+static const size_t vh_hash_width = 256;
+#define EXT(X) X##_256
+#elif defined(VH512)
+static const size_t vh_hash_width = 512;
+#define EXT(X) X##_512
+#elif defined(VH1024)
+static const size_t vh_hash_width = 1024;
+#define EXT(X) X##_1024
+#else
+static const size_t vh_hash_width = 128;
+#define EXT(X) X##_128
+#endif
+
+// width of largest hardware register that is supported (in bits)
+static const size_t vh_hwreg_width = 512;
+
+//-----------------------------------------------------------------------------
+// derived quantities
+
+// width of the virtual SIMD register supported in VectorHash (in bits)
+// must be at least as wide as the largest hardware register that is used
+static const size_t vh_virtreg_width = ( 2*vh_hash_width > vh_hwreg_width ) ? 2*vh_hash_width : vh_hwreg_width;
+// width of the hash in uint32_t elements
+static const size_t vh_nstate = vh_hash_width/32;
+// number of uint32_t's that fit in the virtual register
+static const size_t vh_nint = vh_virtreg_width/32;
+
+// the file is read with this blocksize (in bytes)
+static size_t blocksize = 4*vh_nint*sizeof(uint32_t);
+
+// what instruction sets can the CPU handle?
+typedef enum { IS_INVALID=-1, IS_SCALAR=0, IS_SSE2, IS_AVX2, IS_AVX512 } is_type;
+
+// unfortunately uintptr_t is optional, so we cannot rely on that...
+typedef conditional<sizeof(int*) == 8, uint64_t, uint32_t>::type uintptr;
+
+static_assert( sizeof(int*) == sizeof(uintptr), "definition of uintptr failed" );
+
+void VectorHashFinalize(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
+void stateinit(uint32_t st[], uint32_t& seed);
+
+//-----------------------------------------------------------------------------
+
+#if defined(_MSC_VER)
+
+#define ROTL32(x,y)	_rotl(x,y)
+
+#else
+
+inline uint32_t rotl32 ( uint32_t x, int r )
+{
+	return (x << r) | (x >> (32 - r));
+}
+
+#define	ROTL32(x,y)	rotl32(x,y)
+
+#endif
+
+inline void pad_buffer(const char* src, char* buf, size_t len)
+{
+	for( size_t i=0; i < len; i++ )
+		buf[i] = src[i];
+	char c = '\0';
+	while( len < blocksize )
+		buf[len++] = ++c;
+}
+
+//-----------------------------------------------------------------------------
+// Block read - if your platform needs to do endian-swapping or can only
+// handle aligned reads, do the conversion here
+
+inline uint32_t getblock32 ( uint32_t p )
+{
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+	return (((p & 0xff000000) >> 24) | ((p & 0x00ff0000) >>  8) |
+		((p & 0x0000ff00) <<  8) | ((p & 0x000000ff) << 24));
+#else
+	return p;
+#endif
+}
+
+#define VEC(N, X) for( size_t j=0; j < (N); j++ ) { X; }
+
+#endif

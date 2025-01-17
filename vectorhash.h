@@ -1,0 +1,30 @@
+//-------------------------------------------------------------------------------
+//  Vectorhash - a very fast vectorized hash function optimized for large buffers
+//
+//  Copyright (c) 2018-2025 Peter A.M. van Hoof
+//  All Rights Reserved
+//
+//  Distributed under the "zlib license". See the accompanying LICENSE file.
+//-------------------------------------------------------------------------------
+
+#ifndef VECTORHASH_H
+#define VECTORHASH_H
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void VectorHash(const void* key, size_t len, uint32_t seed, void* out, size_t hash_width);
+
+#ifdef __cplusplus
+}
+#endif
+
+inline void VectorHashi(const void* key, int len, uint32_t seed, void* out)
+{
+	VectorHash(key, (size_t)len, seed, out, 128);
+}
+
+#endif

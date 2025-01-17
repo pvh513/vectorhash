@@ -1,0 +1,25 @@
+//-------------------------------------------------------------------------------
+//  Vectorhash - a very fast vectorized hash function optimized for large buffers
+//
+//  Copyright (c) 2018-2025 Peter A.M. van Hoof
+//  All Rights Reserved
+//
+//  Distributed under the "zlib license". See the accompanying LICENSE file.
+//-------------------------------------------------------------------------------
+
+#ifndef VECTORHASH_SCALAR_H
+#define VECTORHASH_SCALAR_H
+
+#include "vectorhash_priv.h"
+
+void VectorHashBody32_128(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[]);
+void VectorHashBody32_256(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[]);
+void VectorHashBody32_512(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[]);
+void VectorHashBody32_1024(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[]);
+
+void VectorHash32_128(const void* key, size_t len, uint32_t seed, void* out);
+void VectorHash32_256(const void* key, size_t len, uint32_t seed, void* out);
+void VectorHash32_512(const void* key, size_t len, uint32_t seed, void* out);
+void VectorHash32_1024(const void* key, size_t len, uint32_t seed, void* out);
+
+#endif

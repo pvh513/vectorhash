@@ -1,0 +1,18 @@
+//-------------------------------------------------------------------------------
+//  Vectorhash - a very fast vectorized hash function optimized for large buffers
+//
+//  Copyright (c) 2018-2025 Peter A.M. van Hoof
+//  All Rights Reserved
+//
+//  Distributed under the "zlib license". See the accompanying LICENSE file.
+//-------------------------------------------------------------------------------
+
+#ifndef VECTORHASH_FINALIZE_H
+#define VECTORHASH_FINALIZE_H
+
+void VectorHashFinalize_128(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
+void VectorHashFinalize_256(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
+void VectorHashFinalize_512(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
+void VectorHashFinalize_1024(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
+
+#endif

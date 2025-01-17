@@ -1,0 +1,166 @@
+## Vectorhash - a very fast vectorized hash function
+
+Vectorhash is a very fast, non-cryptographic hash function. It has in part been
+inspired by the PRNG algorithm [xoroshiro128++](https://prng.di.unimi.it/)
+written by David Blackman and Sebastiano Vigna (for the core of the hashing
+function) and
+[MurmurHash3](https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp)
+written by Austin Appleby (for the finalization mix and some support routines).
+
+This program has been written such that it can be vectorized using SIMD
+instructions from the SSE2, AVX2, or AVX512f instruction sets, which makes it
+very fast. It also has a scalar version for non-Intel platforms. The resulting
+hash is identical for each of these instruction sets.
+
+The algorithm can produce 128-, 256-, 512-, or 1024-bit checksums. It has been
+extensively tested against smhasher written by ZhuReini Urban and all versions
+pass all the tests using a 2018 version of smhasher. The test harness can be
+found [in this repository](https://github.com/rurban/smhasher). The output of
+the test runs is provided on the web site.
+
+### Command line routines
+
+After building and installing the code (see the separate file INSTALL.md for
+this) you will have four executables called vh128sum, vh256sum, vh512sum, and
+vh1024sum. These can produce checksums of any given file. They are designed to be
+a plug-in replacement for other well-known checksum algorithms. The actual
+checksums will be different of course, but the aim is to replicate all command
+line options. This makes it easy to adapt scripts, etc. See the man page
+included in this distribution for a more detailed description of the options.
+Abbreviations of long command line options are currently not supported. In the
+remaining description only the name vh128sum will be used for brevity, but all
+remarks apply implicitly to the other three executables as well.
+
+The four executables are in fact identical and are hard links to each other. The
+code determines the width of the checksum by looking at the name of the
+executable. If that name contains the string "128" it will produce a 128-bit
+executable, and similarly for 256-, 512-, and 1024-bit checksums. Other widths
+of the checksum are not supported. If it is not possible to determine the width
+of the checksum this way, the width will default to 128 bits. It is also
+possible to force the width with command line flags, e.g. the command vh128sum
+\-l256 will produce a 256-bit checksum.
+
+The vh128sum executable can handle multiple file names in a single invocation
+(as long as you do not exceed the maximum command-line length of the shell).
+Creating or checking hashes this way will be much faster than invoking vh128sum
+separately for each individual file. So this practise is strongly recommended.
+
+The code will automatically detect if supported SIMD instructions are available
+and use the highest set available. If you include the \--verbose flag, the code
+will report which SIMD instruction set has been used. You can also override this
+detection with command line options, e.g. vh128sum \--avx512 will force the code
+to use the AVX512f instruction set, even if the hardware does not support those
+instructions. You will get a crash on an illegal instruction in the latter case.
+These flags are intended for testing and debugging and should not be needed in a
+normal production environment.
+
+The command vh128 \--help will give a complete overview of all flags that are
+supported.
+
+The checksums of an empty file are as follows:
+
+128 bit:   
+<tt>30a574ab9824cb4358b310345eb60ab0</tt>
+
+256 bit:   
+<tt>bb92155ef2049290deea8ca97f4d88d39c0f2490b49e30c483c26086ede6520a</tt>
+
+512 bit:   
+<tt>0bf187c2657c96361df020771e2ef920513ad53d86fae25a99b1f9f5c76b7aa7</tt>
+<tt>2281c0e4c16318bd92fb5627c61677a09da0f950210f5f9f4a4ebf7e9a5ff0dc</tt>
+
+1024 bit:   
+<tt>65ab6b7d081119602b80cdd8296d732f682986d56277d990bb4a002f5ad2eca0</tt>
+<tt>dd963bf652c3a82dea739e42774b49a035760ccbddae9c4641757d7bd7e04f48</tt>
+<tt>a72b89039e1a2dbebb140f3e83813d85f637d5195c3f9c5f023510df0b94f81d</tt>
+<tt>275bc94224ceb3b9256ea207318abddbba5e04c9fcd8e8725253652d1c55f3ae</tt>
+
+### The libvhsum library
+
+After building and installing the code you will have a 64-bit static library
+called <tt>libvhsum.a</tt>. This library exports a routine that will allow
+you to perform a checksum on a buffer. The declaration for the call is:
+
+    #include <vectorhash.h>
+    void VectorHash(const void *key, size_t len, uint32_t seed, void *out, size_t hw);
+
+Here the variable <tt>key</tt> is a pointer to the buffer that should be
+checksummed, <tt>len</tt> is the length of the buffer, <tt>seed</tt> is the seed
+for the checksum algorithm (use 0xfd4c799d to replicate the behavior of
+vh128sum, etc, but any other value is fine too), <tt>out</tt> is a pointer to
+the buffer that will be used to write the checksum into, and <tt>hw</tt> is the
+width of the checksum (allowed values are 128, 256, 512, and 1024). The
+declaration is contained in the header file <tt>vectorhash.h</tt>. A very simple
+program using this library could contain:
+
+    #include <vectorhash.h>
+    // ...
+    size_t len = 1048576; // 1 MiB, but any other size is fine too
+    void *key = malloc(len);
+    // fill buffer...
+    static const size_t hw = 256; // get a 256-bit hash
+    uint32_t checksum[hw/32];
+    VectorHash(key, len, 0xfd4c799d, checksum, hw);
+
+and would need to be compiled with a command like this:
+
+    g++ test.cc -lvhsum -L/path/to/libdir
+
+The <tt>-L</tt> parameter is only needed if the library is not installed in a
+directory that is included in your <tt>LD_LIBRARY_PATH</tt>. The library is
+written in C++, but can also be called from C programs (and even other
+languages like e.g. Fortran) using one additional parameter:
+
+	gcc test.c -lvhsum -L/path/to/libdir -lstdc++
+
+The routine <tt>VectorHash</tt> will automatically determine the hardware
+capabilities of the processor and use the appropriate version of the algorithm.
+However, there is one caveat. Assuming your processor supports AVX512f
+instructions, it will need to read 512 bits of data at once from memory. For this
+the memory address (and hence also the start of the buffer) will need to aligned
+on a 512-bit = 64-byte boundary (in other words, the last 6 bits of the buffer
+address need to be zero). For AVX2 instructions a 32-byte alignment is needed,
+and for SSE2 instructions a 16-byte alignment. The scalar version can work on
+any buffer alignment (even odd addresses, though alignment on an 8-byte boundary
+gives faster results). If the buffer is not correctly aligned, the code will
+automatically revert to a lower algorithm that does support the provided buffer
+alignment. For instance, if the hardware supports AVX512f instructions, but the
+buffer is aligned on a 16-byte boundary, the code will actually use the SSE2
+version of the algorithm since using the AVX512f or AVX2 versions would have
+resulted in a segmentation violation.
+
+In Linux, <tt>malloc()</tt> will typically return buffers aligned on a 16-byte
+boundary, so special measures are needed to obtain buffers on a 32- or 64-byte
+boundary. See
+[this page](https://embeddedartistry.com/blog/2017/02/22/generating-aligned-memory/)
+for a detailed discussion of how to obtain correctly aligned memory.
+
+### The cpuid library
+
+Vectorhash is distributed with a library for detecting CPU capabilities in the
+cpuid subdirectory. This implementation was written by steinwurf. The software
+can be found [in this repository](https://github.com/steinwurf/cpuid/). What is
+contained in the cpuid subdirectory is a somewhat simplified version of the 9.0.1
+release of cpuid. The most important modification is to remove the python
+dependency for the build process. The original license and documentation
+have been retained, so the latter still refers to the python build process, which
+no longer works in this version. A simple Makefile has been added instead.
+The cpuid library is distributed with a BSD-style copyright license.
+
+### The unittest-cpp library
+
+Vectorhash is distributed with a library for unit tests in the unittest-cpp
+subdirectory. This implementation was originally written by Noel Llopis and
+Charles Nicholson. The software can be found
+[in this repository](https://github.com/unittest-cpp/unittest-cpp). What is
+contained in the unittest-cpp subdirectory is a somewhat simplified version
+of the 2.0.0 release. The most important modification is to remove the cmake
+dependency for the build process. The original license and documentation
+have been retained, so the latter still contains incorrect information about
+the build process. A simple Makefile has been added instead. The unittest-cpp
+library is distributed with an MIT/X copyright license.
+
+
+Peter A.M. van Hoof   
+Royal Observatory of Belgium   
+p.vanhoof@oma.be
