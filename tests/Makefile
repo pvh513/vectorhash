@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -g -O0 -W -Wall -I../cpuid -I../unittest-cpp
+CXXFLAGS = -g -O0 -W -Wall -I../src -I../cpuid -I../unittest-cpp
 LDFLAGS = -lcpuid -L../cpuid -lUnitTest++ -L../unittest-cpp -lvhsum -L..
 
 .PHONY: all clean

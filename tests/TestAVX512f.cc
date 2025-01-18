@@ -8,7 +8,7 @@
 //-------------------------------------------------------------------------------
 
 #include "TestMain.h"
-#include "../vectorhash_avx512.h"
+#include "vectorhash_avx512.h"
 
 namespace {
 
