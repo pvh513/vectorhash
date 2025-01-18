@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include "cpuid/cpuinfo.hpp"
+#include "../cpuid/cpuinfo.hpp"
 #include "vectorhash.h"
 #include "vectorhash_priv.h"
 #include "vectorhash_core.h"

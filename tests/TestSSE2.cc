@@ -8,7 +8,7 @@
 //-------------------------------------------------------------------------------
 
 #include "TestMain.h"
-#include "../vectorhash_sse2.h"
+#include "vectorhash_sse2.h"
 
 namespace {
 

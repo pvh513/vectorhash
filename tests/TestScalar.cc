@@ -8,7 +8,7 @@
 //-------------------------------------------------------------------------------
 
 #include "TestMain.h"
-#include "../vectorhash_scalar.h"
+#include "vectorhash_scalar.h"
 
 namespace {
 
