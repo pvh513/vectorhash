@@ -1,5 +1,5 @@
 //-------------------------------------------------------------------------------
-//  Vectorhash - a very fast vectorized hash function optimized for large buffers
+//  VectorHash - a very fast hash function optimized using SIMD instructions
 //
 //  Copyright (c) 2018-2025 Peter A.M. van Hoof
 //  All Rights Reserved

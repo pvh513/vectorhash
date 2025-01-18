@@ -1,5 +1,5 @@
 //-------------------------------------------------------------------------------
-//  Vectorhash - a very fast vectorized hash function optimized for large buffers
+//  VectorHash - a very fast hash function optimized using SIMD instructions
 //
 //  Copyright (c) 2018-2025 Peter A.M. van Hoof
 //  All Rights Reserved
@@ -21,10 +21,5 @@ void VectorHash(const void* key, size_t len, uint32_t seed, void* out, size_t ha
 #ifdef __cplusplus
 }
 #endif
-
-inline void VectorHashi(const void* key, int len, uint32_t seed, void* out)
-{
-	VectorHash(key, (size_t)len, seed, out, 128);
-}
 
 #endif
