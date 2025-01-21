@@ -10,10 +10,14 @@
 #ifndef VECTORHASH_AVX2_H
 #define VECTORHASH_AVX2_H
 
-#include <immintrin.h>
 #include "vectorhash_priv.h"
 
+#ifdef VH_INTEL
+#include <immintrin.h>
 typedef __m256i v8si;
+#else
+typedef uint32_t v8si;
+#endif
 
 void VectorHashBody256_128(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[]);
 void VectorHashBody256_256(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[]);

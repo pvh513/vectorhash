@@ -14,6 +14,7 @@
 #include <string>
 #include <sstream>
 #include <cstdlib>
+#include <cstring>
 #include <regex>
 
 #if defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
@@ -224,7 +225,7 @@ static string VHstdin(const vh_params& vhp)
 		if( bsize == 0 )
 			break;
 		if( bsize < vhp.blocksize )
-			pad_buffer( (const char*)map, (char*)map, bsize );
+			pad_buffer( (const uint8_t*)map, (uint8_t*)map, bsize );
 		if( vhp.SIMDversion == IS_AVX512 )
 			VectorHashBody512((const v16si*)map, (v16si*)h1, (v16si*)h2, (v16si*)h3, (v16si*)h4, vhp.vh_hash_width);
 		else if( vhp.SIMDversion == IS_AVX2 )

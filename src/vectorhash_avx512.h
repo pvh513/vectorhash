@@ -10,10 +10,14 @@
 #ifndef VECTORHASH_AVX512_H
 #define VECTORHASH_AVX512_H
 
-#include <immintrin.h>
 #include "vectorhash_priv.h"
 
+#ifdef VH_INTEL
+#include <immintrin.h>
 typedef __m512i v16si;
+#else
+typedef uint32_t v16si;
+#endif
 
 void VectorHashBody512_128(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v16si h4[]);
 void VectorHashBody512_256(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v16si h4[]);

@@ -1,11 +1,11 @@
-CC = g++
+CXX = g++
 CCFLAGS = -std=c++11 -g -W
 LDFLAGS =
 LDLIBS = -L.
 SED = sed
 MV = mv
 RM = rm
-CCDEP = g++
+CCDEP = $(CXX)
 CCDEPFLAGS = -std=c++11 -g -W
 
 .PHONY: all clean
@@ -99,7 +99,7 @@ $(lib): $(objects)
 
 $(test): $(lib) $(test_objects)
 	@echo Linking $(test)...
-	$(CC) $(LDFLAGS) -o $(test) $(test_objects) $(lib) $(LDLIBS)
+	$(CXX) $(LDFLAGS) -o $(test) $(test_objects) $(lib) $(LDLIBS)
 	@echo Running unit tests...
 	./$(test)
 
@@ -108,7 +108,7 @@ clean:
 
 %.o : %.cpp
 	@$(call make-depend,$<,$@,$(subst .o,.d,$@))
-	$(CC) $(CCFLAGS) -c -o $(patsubst %.cpp,%.o,$<) $<
+	$(CXX) $(CCFLAGS) -c -o $(patsubst %.cpp,%.o,$<) $<
 
 
 ifneq "$(MAKECMDGOALS)" "clean"

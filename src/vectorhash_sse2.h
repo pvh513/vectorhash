@@ -10,10 +10,14 @@
 #ifndef VECTORHASH_SSE2_H
 #define VECTORHASH_SSE2_H
 
-#include <immintrin.h>
 #include "vectorhash_priv.h"
 
+#ifdef VH_INTEL
+#include <immintrin.h>
 typedef __m128i v4si;
+#else
+typedef uint32_t v4si;
+#endif
 
 void VectorHashBody128_128(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[]);
 void VectorHashBody128_256(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[]);

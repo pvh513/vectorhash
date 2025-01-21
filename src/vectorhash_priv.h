@@ -19,6 +19,21 @@ using namespace std;
 
 static const string vh_version( "0.1" );
 
+#undef VH_INTEL
+#ifdef MSVC
+
+#if defined(_M_IX86) || defined(_M_X64)
+#define VH_INTEL 1
+#endif
+
+#else
+
+#if defined(i386) || defined(__i386__) || defined(__i386) || defined(__x86_64__)
+#define VH_INTEL 1
+#endif
+
+#endif
+
 //-----------------------------------------------------------------------------
 // tunable parameters
 
@@ -66,7 +81,6 @@ typedef conditional<sizeof(int*) == 8, uint64_t, uint32_t>::type uintptr;
 
 static_assert( sizeof(int*) == sizeof(uintptr), "definition of uintptr failed" );
 
-void VectorHashFinalize(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
 void stateinit(uint32_t st[], uint32_t& seed);
 
 //-----------------------------------------------------------------------------
@@ -79,6 +93,7 @@ void stateinit(uint32_t st[], uint32_t& seed);
 
 inline uint32_t rotl32 ( uint32_t x, int r )
 {
+	// this expression is missing various safety checks for better speed
 	return (x << r) | (x >> (32 - r));
 }
 
@@ -86,13 +101,14 @@ inline uint32_t rotl32 ( uint32_t x, int r )
 
 #endif
 
-inline void pad_buffer(const char* src, char* buf, size_t len)
+inline void pad_buffer(const uint8_t* src, uint8_t* buf, size_t len)
 {
 	for( size_t i=0; i < len; i++ )
 		buf[i] = src[i];
-	char c = '\0';
+	uint32_t c = 0;
+	const uint32_t mask = 0xff;
 	while( len < blocksize )
-		buf[len++] = ++c;
+		buf[len++] = uint8_t(++c & mask);
 }
 
 //-----------------------------------------------------------------------------

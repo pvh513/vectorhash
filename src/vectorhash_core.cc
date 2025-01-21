@@ -27,6 +27,7 @@ void stateinit(uint32_t st[], uint32_t& seed, size_t lvh_nint)
 
 is_type GetSIMDVersion()
 {
+#ifdef VH_INTEL
 	// determine which SIMD instruction set should be used to calculate the checksum
 	//
 	// -1: not initialized yet
@@ -44,6 +45,9 @@ is_type GetSIMDVersion()
 		return IS_SSE2;
 	else
 		return IS_SCALAR;
+#else
+	return IS_SCALAR;
+#endif
 }
 
 void VectorHashBody32(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[],

@@ -7,7 +7,6 @@
 //  Distributed under the "zlib license". See the accompanying LICENSE file.
 //-------------------------------------------------------------------------------
 
-#include <immintrin.h>
 #include "vectorhash_priv.h"
 #include "vectorhash_core.h"
 #include "vectorhash_finalize.h"
@@ -20,6 +19,7 @@ static const size_t nreg256 = vh_nint/8;
 
 void EXT(VectorHashBody256)(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[])
 {
+#ifdef VH_INTEL
 	v8si s[nreg256], x1[nreg256], x2[nreg256];
 
 	VEC( nreg256, s[j] = _mm256_xor_si256(h1[j], h2[j]) );
@@ -69,6 +69,9 @@ void EXT(VectorHashBody256)(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v
 	VEC( nreg256, x1[j] = _mm256_slli_epi32(s[j], 19) );
 	VEC( nreg256, x2[j] = _mm256_srli_epi32(s[j], 13) );
 	VEC( nreg256, h1[j] = _mm256_or_si256(x1[j], x2[j]) );
+#else
+	(void)0;
+#endif
 }
 
 void EXT(VectorHash256)(const void* key, size_t len, uint32_t seed, void* out)
@@ -89,7 +92,7 @@ void EXT(VectorHash256)(const void* key, size_t len, uint32_t seed, void* out)
 
 	// pad the remaining characters and process...
 	v8si buf[blocksize/sizeof(v8si)];
-	pad_buffer( (const char*)data, (char*)buf, len-nblocks*blocksize );
+	pad_buffer( (const uint8_t*)data, (uint8_t*)buf, len-nblocks*blocksize );
 	EXT(VectorHashBody256)(buf, h1, h2, h3, h4);
 
 	uint32_t* z1 = (uint32_t*)h1;
