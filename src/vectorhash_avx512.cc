@@ -17,9 +17,9 @@
 
 static const size_t nreg512 = vh_nint/16;
 
+#ifdef VH_INTEL
 void EXT(VectorHashBody512)(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v16si h4[])
 {
-#ifdef VH_INTEL
 	v16si s[nreg512], x1[nreg512], x2[nreg512];
 
 	VEC( nreg512, s[j] = _mm512_xor_si512(h1[j], h2[j]) );
@@ -53,10 +53,13 @@ void EXT(VectorHashBody512)(const v16si* data, v16si h1[], v16si h2[], v16si h3[
 	VEC( nreg512, x2[j] = _mm512_slli_epi32(s[j], 14) );
 	VEC( nreg512, h4[j] = _mm512_xor_si512(x1[j], x2[j]) );
 	VEC( nreg512, h1[j] = _mm512_rol_epi32(s[j], 19) );
-#else
-	(void)0;
-#endif
 }
+#else
+void EXT(VectorHashBody512)(const v16si*, v16si[], v16si[], v16si[], v16si[])
+{
+	(void)0;
+}
+#endif
 
 void EXT(VectorHash512)(const void* key, size_t len, uint32_t seed, void* out)
 {

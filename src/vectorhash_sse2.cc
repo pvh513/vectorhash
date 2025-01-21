@@ -17,9 +17,9 @@
 
 static const size_t nreg128 = vh_nint/4;
 
+#ifdef VH_INTEL
 void EXT(VectorHashBody128)(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[])
 {
-#ifdef VH_INTEL
 	v4si s[nreg128], x1[nreg128], x2[nreg128];
 
 	VEC( nreg128, s[j] = _mm_xor_si128(h1[j], h2[j]) );
@@ -69,10 +69,13 @@ void EXT(VectorHashBody128)(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v
 	VEC( nreg128, x1[j] = _mm_slli_epi32(s[j], 19) );
 	VEC( nreg128, x2[j] = _mm_srli_epi32(s[j], 13) );
 	VEC( nreg128, h1[j] = _mm_or_si128(x1[j], x2[j]) );
-#else
-	(void)0;
-#endif
 }
+#else
+void EXT(VectorHashBody128)(const v4si*, v4si[], v4si[], v4si[], v4si[])
+{
+	(void)0;
+}
+#endif
 
 void EXT(VectorHash128)(const void* key, size_t len, uint32_t seed, void* out)
 {
