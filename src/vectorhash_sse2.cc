@@ -77,7 +77,7 @@ void EXT(VectorHashBody128)(const v4si*, v4si[], v4si[], v4si[], v4si[])
 }
 #endif
 
-void EXT(VectorHash128)(const void* key, size_t len, uint32_t seed, void* out)
+void EXT(VectorHash128)(const void* buffer, size_t len, uint32_t seed, void* out)
 {
 	v4si h1[nreg128], h2[nreg128], h3[nreg128], h4[nreg128];
 	stateinit( (uint32_t*)h1, seed, vh_nint );
@@ -86,7 +86,7 @@ void EXT(VectorHash128)(const void* key, size_t len, uint32_t seed, void* out)
 	stateinit( (uint32_t*)h4, seed, vh_nint );
 
 	size_t nblocks = len/blocksize;
-	const v4si* data = (const v4si*)key;
+	const v4si* data = (const v4si*)buffer;
 	for( size_t i=0; i < nblocks; i++ )
 	{
 		EXT(VectorHashBody128)(data, h1, h2, h3, h4);

@@ -33,7 +33,7 @@ void EXT(VectorHashBody32)(const uint32_t* data, uint32_t h1[], uint32_t h2[], u
 	VEC( vh_nint, h1[j] = ROTL32(s[j], 19) );
 }
 
-void EXT(VectorHash32)(const void* key, size_t len, uint32_t seed, void* out)
+void EXT(VectorHash32)(const void* buffer, size_t len, uint32_t seed, void* out)
 {
 	uint32_t h1[vh_nint], h2[vh_nint], h3[vh_nint], h4[vh_nint];
 	stateinit( h1, seed, vh_nint );
@@ -42,7 +42,7 @@ void EXT(VectorHash32)(const void* key, size_t len, uint32_t seed, void* out)
 	stateinit( h4, seed, vh_nint );
 
 	size_t nblocks = len/blocksize;
-	const uint32_t* data = (const uint32_t*)key;
+	const uint32_t* data = (const uint32_t*)buffer;
 	for( size_t i=0; i < nblocks; i++ )
 	{
 		EXT(VectorHashBody32)(data, h1, h2, h3, h4);

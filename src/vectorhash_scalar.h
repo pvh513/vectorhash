@@ -17,9 +17,9 @@ void VectorHashBody32_256(const uint32_t* data, uint32_t h1[], uint32_t h2[], ui
 void VectorHashBody32_512(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[]);
 void VectorHashBody32_1024(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[]);
 
-void VectorHash32_128(const void* key, size_t len, uint32_t seed, void* out);
-void VectorHash32_256(const void* key, size_t len, uint32_t seed, void* out);
-void VectorHash32_512(const void* key, size_t len, uint32_t seed, void* out);
-void VectorHash32_1024(const void* key, size_t len, uint32_t seed, void* out);
+void VectorHash32_128(const void* buf, size_t len, uint32_t seed, void* out);
+void VectorHash32_256(const void* buf, size_t len, uint32_t seed, void* out);
+void VectorHash32_512(const void* buf, size_t len, uint32_t seed, void* out);
+void VectorHash32_1024(const void* buf, size_t len, uint32_t seed, void* out);
 
 #endif

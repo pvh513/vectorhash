@@ -1,4 +1,4 @@
-## Vectorhash - a very fast vectorized hash function
+## VectorHash - a very fast vectorized hash function
 
 ### Compiling the code
 

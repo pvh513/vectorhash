@@ -24,9 +24,9 @@ void VectorHashBody128_256(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4
 void VectorHashBody128_512(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[]);
 void VectorHashBody128_1024(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[]);
 
-void VectorHash128_128(const void* key, size_t len, uint32_t seed, void* out);
-void VectorHash128_256(const void* key, size_t len, uint32_t seed, void* out);
-void VectorHash128_512(const void* key, size_t len, uint32_t seed, void* out);
-void VectorHash128_1024(const void* key, size_t len, uint32_t seed, void* out);
+void VectorHash128_128(const void* buf, size_t len, uint32_t seed, void* out);
+void VectorHash128_256(const void* buf, size_t len, uint32_t seed, void* out);
+void VectorHash128_512(const void* buf, size_t len, uint32_t seed, void* out);
+void VectorHash128_1024(const void* buf, size_t len, uint32_t seed, void* out);
 
 #endif

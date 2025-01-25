@@ -8,18 +8,18 @@ VectorHash library
 .nf
 .B #include <vectorhash.h>
 .PP
-.BI "void VectorHash(const void *\fIkey\fP, size_t \fIlen\fP, uint32_t \fIseed\fP, void *\fIout\fP, size_t \fIhw\fP);"
+.BI "void VectorHash(const void *\fIbuf\fP, size_t \fIlen\fP, uint32_t \fIseed\fP, void *\fIout\fP, size_t \fIhw\fP);"
 .fi
 .SH ARGUMENTS
 .TP
-\fB\fIkey\fP\fR
+\fB\fIbuf\fP\fR
 Pointer to the buffer that needs to be checksummed.
 .TP
 \fB\fIlen\fP\fR
 The length of the buffer in bytes. Can be any value, including zero.
 .TP
 \fB\fIseed\fP\fR
-The seed for the hashing algorithm. Can be any 32-bit value, including zero.
+The seed for the checksum algorithm. Can be any 32-bit value, including zero.
 .TP
 \fB\fIout\fP\fR
 Pointer to the memory area where the checksum will be written. Needs to be at
@@ -52,7 +52,7 @@ Do not use the VectorHash algorithm for security related purposes.
 If the memory area pointed to by \fIout\fP is not big enough to hold the
 resulting checksum, undefined behavior will result.
 
-The buffer pointed to by \fIkey\fP needs to be correctly aligned to take full
+The buffer pointed to by \fIbuf\fP needs to be correctly aligned to take full
 advantage of the SIMD instruction sets. Assuming your processor supports AVX512f
 instructions, it will need to read 512 bits of data at once from memory. For
 this the memory address (and hence also the start of the buffer) will need to

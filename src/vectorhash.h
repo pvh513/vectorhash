@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-void VectorHash(const void* key, size_t len, uint32_t seed, void* out, size_t hash_width);
+void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width);
 
 #ifdef __cplusplus
 }

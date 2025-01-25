@@ -77,7 +77,7 @@ void EXT(VectorHashBody256)(const v8si*, v8si[], v8si[], v8si[], v8si[])
 }
 #endif
 
-void EXT(VectorHash256)(const void* key, size_t len, uint32_t seed, void* out)
+void EXT(VectorHash256)(const void* buffer, size_t len, uint32_t seed, void* out)
 {
 	v8si h1[nreg256], h2[nreg256], h3[nreg256], h4[nreg256];
 	stateinit( (uint32_t*)h1, seed, vh_nint );
@@ -86,7 +86,7 @@ void EXT(VectorHash256)(const void* key, size_t len, uint32_t seed, void* out)
 	stateinit( (uint32_t*)h4, seed, vh_nint );
 
 	size_t nblocks = len/blocksize;
-	const v8si* data = (const v8si*)key;		
+	const v8si* data = (const v8si*)buffer;		
 	for( size_t i=0; i < nblocks; i++ )
 	{
 		EXT(VectorHashBody256)(data, h1, h2, h3, h4);

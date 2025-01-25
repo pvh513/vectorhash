@@ -24,7 +24,7 @@ void VectorHashBody32(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32
 void VectorHashBody128(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[], size_t hash_width);
 void VectorHashBody256(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[], size_t hash_width);
 void VectorHashBody512(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v16si h4[], size_t hash_width);
-void VectorHash(const void* key, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hash_width);
+void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hash_width);
 
 inline uint32_t fmix32 ( uint32_t h0, uint32_t h1 = 0xd86b048b )
 {

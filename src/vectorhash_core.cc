@@ -115,93 +115,93 @@ void VectorHashBody512(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v1
 	}
 }
 
-static void VectorHash32(const void* key, size_t len, uint32_t seed, void* out, size_t hash_width)
+static void VectorHash32(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
 	if( hash_width == 128 )
-		VectorHash32_128(key, len, seed, out);
+		VectorHash32_128(buf, len, seed, out);
 	else if( hash_width == 256 )
-		VectorHash32_256(key, len, seed, out);
+		VectorHash32_256(buf, len, seed, out);
 	else if( hash_width == 512 )
-		VectorHash32_512(key, len, seed, out);
+		VectorHash32_512(buf, len, seed, out);
 	else if( hash_width == 1024 )
-		VectorHash32_1024(key, len, seed, out);
+		VectorHash32_1024(buf, len, seed, out);
 	else {
 		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
 		exit(1);
 	}
 }
 
-static void VectorHash128(const void* key, size_t len, uint32_t seed, void* out, size_t hash_width)
+static void VectorHash128(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
 	if( hash_width == 128 )
-		VectorHash128_128(key, len, seed, out);
+		VectorHash128_128(buf, len, seed, out);
 	else if( hash_width == 256 )
-		VectorHash128_256(key, len, seed, out);
+		VectorHash128_256(buf, len, seed, out);
 	else if( hash_width == 512 )
-		VectorHash128_512(key, len, seed, out);
+		VectorHash128_512(buf, len, seed, out);
 	else if( hash_width == 1024 )
-		VectorHash128_1024(key, len, seed, out);
+		VectorHash128_1024(buf, len, seed, out);
 	else {
 		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
 		exit(1);
 	}
 }
 
-static void VectorHash256(const void* key, size_t len, uint32_t seed, void* out, size_t hash_width)
+static void VectorHash256(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
 	if( hash_width == 128 )
-		VectorHash256_128(key, len, seed, out);
+		VectorHash256_128(buf, len, seed, out);
 	else if( hash_width == 256 )
-		VectorHash256_256(key, len, seed, out);
+		VectorHash256_256(buf, len, seed, out);
 	else if( hash_width == 512 )
-		VectorHash256_512(key, len, seed, out);
+		VectorHash256_512(buf, len, seed, out);
 	else if( hash_width == 1024 )
-		VectorHash256_1024(key, len, seed, out);
+		VectorHash256_1024(buf, len, seed, out);
 	else {
 		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
 		exit(1);
 	}
 }
 
-static void VectorHash512(const void* key, size_t len, uint32_t seed, void* out, size_t hash_width)
+static void VectorHash512(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
 	if( hash_width == 128 )
-		VectorHash512_128(key, len, seed, out);
+		VectorHash512_128(buf, len, seed, out);
 	else if( hash_width == 256 )
-		VectorHash512_256(key, len, seed, out);
+		VectorHash512_256(buf, len, seed, out);
 	else if( hash_width == 512 )
-		VectorHash512_512(key, len, seed, out);
+		VectorHash512_512(buf, len, seed, out);
 	else if( hash_width == 1024 )
-		VectorHash512_1024(key, len, seed, out);
+		VectorHash512_1024(buf, len, seed, out);
 	else {
 		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
 		exit(1);
 	}
 }
 
-void VectorHash(const void* key, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hash_width)
+void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hash_width)
 {
-	auto ikey = reinterpret_cast<uintptr>(key);
-	// check if the alignment of the pointer in key is OK
+	auto ibuf = reinterpret_cast<uintptr>(buf);
+	// check if the alignment of the pointer in buf is OK
 	// AVX512 requires 64-byte alignment
 	// AVX2   requires 32-byte alignment
 	// SSE2   requires 16-byte alignment
 	// Scalar requires no special alignment
-	if( SIMDversion >= IS_AVX512 && (ikey&0x3f) == 0 )
+	if( SIMDversion >= IS_AVX512 && (ibuf&0x3f) == 0 )
 	{
-		VectorHash512(key, len, seed, out, hash_width);
+		VectorHash512(buf, len, seed, out, hash_width);
 	}
-	else if( SIMDversion >= IS_AVX2 && (ikey&0x1f) == 0 )
+	else if( SIMDversion >= IS_AVX2 && (ibuf&0x1f) == 0 )
 	{
-		VectorHash256(key, len, seed, out, hash_width);
+		VectorHash256(buf, len, seed, out, hash_width);
 	}
-	else if( SIMDversion >= IS_SSE2 && (ikey&0x0f) == 0 )
+	else if( SIMDversion >= IS_SSE2 && (ibuf&0x0f) == 0 )
 	{
-		VectorHash128(key, len, seed, out, hash_width);
+		VectorHash128(buf, len, seed, out, hash_width);
 	}
 	else if( SIMDversion >= IS_SCALAR )
 	{
-		VectorHash32(key, len, seed, out, hash_width);
+		VectorHash32(buf, len, seed, out, hash_width);
 	}
 	else {
 		cout << "Internal error: impossible value for SIMD version: " << SIMDversion << "." << endl;
@@ -209,7 +209,7 @@ void VectorHash(const void* key, size_t len, uint32_t seed, void* out, is_type S
 	}
 }
 
-void VectorHash(const void* key, size_t len, uint32_t seed, void* out, size_t hash_width)
+void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
-	VectorHash(key, len, seed, out, GetSIMDVersion(), hash_width);
+	VectorHash(buf, len, seed, out, GetSIMDVersion(), hash_width);
 }

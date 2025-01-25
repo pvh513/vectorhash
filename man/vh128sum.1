@@ -14,16 +14,16 @@ vh128sum, vh256sum, vh512sum, vh1024sum \- compute or check VectorHash checksums
 .B vh1024sum
 [\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
 .SH DESCRIPTION
-Compute or check 128-, 256-, 512-, or 1024-bit VectorHash checksums. Hash is a
-synonym for checksum.
+Compute or check 128-, 256-, 512-, or 1024-bit VectorHash checksums. In this
+document hash is used as a synonym for checksum.
 .PP
-Vectorhash is a very fast, non-cryptographic hash function. It has in part been
-inspired by the PRNG algorithm xoroshiro128++ written by David Blackman and
+VectorHash is a very fast, non-cryptographic checksum algorithm. It has in part
+been inspired by the PRNG algorithm xoroshiro128++ written by David Blackman and
 Sebastiano Vigna (for the core of the hashing function) and MurmurHash3 written
 by Austin Appleby (for the finalization mix and some support routines). This
 program has been written such that it can be vectorized using SIMD instructions
 from the SSE2, AVX2, or AVX512f instruction sets, which makes it very fast. It
-also has a scalar version for non-Intel platforms. The resulting hash is
+also has a scalar version for non-Intel platforms. The resulting checksum is
 identical for each of these instruction sets. The supported instruction sets
 will be detected automatically during runtime.
 
