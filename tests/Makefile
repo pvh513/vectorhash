@@ -19,3 +19,4 @@ TestMain: TestMain.o TestScalar.o TestSSE2.o TestAVX2.o TestAVX512f.o
 	@echo " Starting VectorHash tests... "
 	@echo "=============================="
 	./TestMain
+	./run_tests.sh
