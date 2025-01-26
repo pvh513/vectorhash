@@ -133,15 +133,14 @@ However, there is one caveat. Assuming your processor supports AVX512f
 instructions, it will need to read 512 bits of data at once from memory. For
 this the memory address (and hence also the start of the buffer) will need to
 aligned on a 512-bit = 64-byte boundary (in other words, the last 6 bits of the
-buffer address need to be zero). For AVX2 instructions a 32-byte alignment is
-needed, and for SSE2 instructions a 16-byte alignment. The scalar version can
-work on any buffer alignment (even odd addresses, though alignment on an 8-byte
-boundary gives faster results). If the buffer is not correctly aligned, the code
-will automatically revert to a lower algorithm that does support the provided
-buffer alignment. For instance, if the hardware supports AVX512f instructions,
-but the buffer is aligned on a 16-byte boundary, the code will actually use the
-SSE2 version of the algorithm since using the AVX512f or AVX2 versions would
-have resulted in a segmentation violation.
+buffer address need to be zero). For AVX2 instructions 32-byte alignment is
+needed, and for SSE2 instructions 16-byte alignment. The scalar version can work
+on any buffer alignment (even odd addresses). If the buffer is not correctly
+aligned, the code will automatically revert to a lower algorithm that does
+support the provided buffer alignment. For instance, if the hardware supports
+AVX512f instructions, but the buffer is aligned on a 16-byte boundary, the code
+will actually use the SSE2 version of the algorithm since using the AVX512f or
+AVX2 versions would have resulted in a segmentation violation.
 
 In Linux, <tt>malloc()</tt> will typically return buffers aligned on a 16-byte
 boundary, so special measures are needed to obtain buffers on a 32- or 64-byte
