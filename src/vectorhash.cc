@@ -342,10 +342,7 @@ static void PrintHelp(const vh_params& vhp)
 	cout << "  -t, --text            read FILE in text mode (default)\n";
 	cout << "  -z, --zero            end each output line with NUL, not newline,\n";
 	cout << "                        and disable file name escaping\n";
-	cout << "      --128             force 128-bit checksum width\n";
-	cout << "      --256             force 256-bit checksum width\n";
-	cout << "      --512             force 512-bit checksum width\n";
-	cout << "      --1024            force 1024-bit checksum width\n";
+	cout << "  -l, --length          set checksum width (allowed values 128, 256, 512, or 1024)\n";
 	cout << "      --                this flag terminates the list of OPTIONs, allowing FILE\n";
 	cout << "                        names starting with \"-\" to be used after this flag\n"; 
 	cout << endl;
