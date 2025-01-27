@@ -26,12 +26,22 @@ void VectorHashBody256(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h
 void VectorHashBody512(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v16si h4[], size_t hash_width);
 void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hash_width);
 
-inline uint32_t fmix32 ( uint32_t h0, uint32_t h1 = 0xd86b048b )
+// This routine is needed because the standard says that integer overflow results in undefined behavior.
+// This routine looks like a lot of overhead, but a good compiler will optimize this into a single
+// hardware instruction provided the hardware does the right thing (which is usually the case).
+inline uint32_t vh_add(uint32_t a, uint32_t b)
+{
+	uint64_t c = a;
+	c += uint64_t(b);
+	return uint32_t(c & UINT64_C(0xffffffff));
+}
+
+inline uint32_t fmix32(uint32_t h0, uint32_t h1 = 0xd86b048b)
 {
 	h1 ^= h0;
 	h0 = ROTL32(h0, 11) ^ h1 ^ ROTL32(h1, 13);
 	h1 = ROTL32(h1, 19);
-	return h0 + h1;
+	return vh_add(h0, h1);
 }
 
 #endif

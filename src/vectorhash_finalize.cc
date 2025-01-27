@@ -24,43 +24,43 @@ void EXT(VectorHashFinalize)(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h
 
 	for( size_t j=1; j < vh_nint; j++ )
 	{
-		h1[0] += h2[j];
-		h2[0] += h3[j];
-		h3[0] += h4[j];
-		h4[0] += h1[j];
-		h1[j] += h2[0];
-		h2[j] += h3[0];
-		h3[j] += h4[0];
-		h4[j] += h1[0];
+		h1[0] = vh_add(h1[0], h2[j]);
+		h2[0] = vh_add(h2[0], h3[j]);
+		h3[0] = vh_add(h3[0], h4[j]);
+		h4[0] = vh_add(h4[0], h1[j]);
+		h1[j] = vh_add(h1[j], h2[0]);
+		h2[j] = vh_add(h2[j], h3[0]);
+		h3[j] = vh_add(h3[j], h4[0]);
+		h4[j] = vh_add(h4[j], h1[0]);
 	}
 
-	VEC( vh_nint, h1[j] += h2[j] );
-	VEC( vh_nint, h1[j] += h3[j] );
-	VEC( vh_nint, h1[j] += h4[j] );
-	VEC( vh_nint, h2[j] += h1[j] );
-	VEC( vh_nint, h3[j] += h1[j] );
-	VEC( vh_nint, h4[j] += h1[j] );
+	VEC( vh_nint, h1[j] = vh_add(h1[j], h2[j]) );
+	VEC( vh_nint, h1[j] = vh_add(h1[j], h3[j]) );
+	VEC( vh_nint, h1[j] = vh_add(h1[j], h4[j]) );
+	VEC( vh_nint, h2[j] = vh_add(h2[j], h1[j]) );
+	VEC( vh_nint, h3[j] = vh_add(h3[j], h1[j]) );
+	VEC( vh_nint, h4[j] = vh_add(h4[j], h1[j]) );
 	VEC( vh_nint, h1[j] = fmix32(h1[j], h3[j]) );
 	VEC( vh_nint, h2[j] = fmix32(h2[j], h4[j]) );
 	VEC( vh_nint, h3[j] = fmix32(h3[j], h1[j]) );
 	VEC( vh_nint, h4[j] = fmix32(h4[j], h2[j]) );
-	VEC( vh_nint, h1[j] += h2[j] );
-	VEC( vh_nint, h1[j] += h3[j] );
-	VEC( vh_nint, h1[j] += h4[j] );
-	VEC( vh_nint, h2[j] += h1[j] );
-	VEC( vh_nint, h3[j] += h1[j] );
-	VEC( vh_nint, h4[j] += h1[j] );
+	VEC( vh_nint, h1[j] = vh_add(h1[j], h2[j]) );
+	VEC( vh_nint, h1[j] = vh_add(h1[j], h3[j]) );
+	VEC( vh_nint, h1[j] = vh_add(h1[j], h4[j]) );
+	VEC( vh_nint, h2[j] = vh_add(h2[j], h1[j]) );
+	VEC( vh_nint, h3[j] = vh_add(h3[j], h1[j]) );
+	VEC( vh_nint, h4[j] = vh_add(h4[j], h1[j]) );
 
 	for( size_t j=1; j < vh_nint; j++ )
 	{
-		h1[0] += h4[j];
-		h2[0] += h1[j];
-		h3[0] += h2[j];
-		h4[0] += h3[j];
-		h1[j] += h4[0];
-		h2[j] += h1[0];
-		h3[j] += h2[0];
-		h4[j] += h3[0];
+		h1[0] = vh_add(h1[0], h4[j]);
+		h2[0] = vh_add(h2[0], h1[j]);
+		h3[0] = vh_add(h3[0], h2[j]);
+		h4[0] = vh_add(h4[0], h3[j]);
+		h1[j] = vh_add(h1[j], h4[0]);
+		h2[j] = vh_add(h2[j], h1[0]);
+		h3[j] = vh_add(h3[j], h2[0]);
+		h4[j] = vh_add(h4[j], h3[0]);
 	}
 
 	uint32_t* res = (uint32_t*)out;
