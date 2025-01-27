@@ -74,20 +74,20 @@ supported.
 The checksums of an empty file are as follows:
 
 128 bit:   
-<tt>30a574ab9824cb4358b310345eb60ab0</tt>
+<tt>fe82e7d9998e9819c7ac954ea0a0ea8e</tt>
 
 256 bit:   
-<tt>bb92155ef2049290deea8ca97f4d88d39c0f2490b49e30c483c26086ede6520a</tt>
+<tt>c87638f19f1778d7ee03dddc5c6677fd0701e532d311bfffddfc21c0ece8910a</tt>
 
 512 bit:   
-<tt>0bf187c2657c96361df020771e2ef920513ad53d86fae25a99b1f9f5c76b7aa7</tt>
-<tt>2281c0e4c16318bd92fb5627c61677a09da0f950210f5f9f4a4ebf7e9a5ff0dc</tt>
+<tt>280f647d93f843b75627cc8c437084e2668a3cd9e077a2cf3186c67c990983c2</tt>
+<tt>8ff8180187d362a79cb02cb49ba350a5e185e0050fc273e836b1db30571cfa66</tt>
 
 1024 bit:   
-<tt>65ab6b7d081119602b80cdd8296d732f682986d56277d990bb4a002f5ad2eca0</tt>
-<tt>dd963bf652c3a82dea739e42774b49a035760ccbddae9c4641757d7bd7e04f48</tt>
-<tt>a72b89039e1a2dbebb140f3e83813d85f637d5195c3f9c5f023510df0b94f81d</tt>
-<tt>275bc94224ceb3b9256ea207318abddbba5e04c9fcd8e8725253652d1c55f3ae</tt>
+<tt>c38bd292e55400931e47f4397b5266b3e143ffd918fb944c33ad908458a08c62</tt>
+<tt>65e9c28007bf68301ab6f68c82ddcc2fa993ad69556b9ab4d588594ac4d02b5d</tt>
+<tt>dd083a4cf1418b6522f06bff90a67bf93faaa719e1dbdbda3592deddbd1a8378</tt>
+<tt>f0993653e73c292f338729c1efe01b352e90ed9a0ae01e613ad72736db619b2d</tt>
 
 ### The libvhsum library
 
@@ -133,15 +133,14 @@ However, there is one caveat. Assuming your processor supports AVX512f
 instructions, it will need to read 512 bits of data at once from memory. For
 this the memory address (and hence also the start of the buffer) will need to
 aligned on a 512-bit = 64-byte boundary (in other words, the last 6 bits of the
-buffer address need to be zero). For AVX2 instructions a 32-byte alignment is
-needed, and for SSE2 instructions a 16-byte alignment. The scalar version can
-work on any buffer alignment (even odd addresses, though alignment on an 8-byte
-boundary gives faster results). If the buffer is not correctly aligned, the code
-will automatically revert to a lower algorithm that does support the provided
-buffer alignment. For instance, if the hardware supports AVX512f instructions,
-but the buffer is aligned on a 16-byte boundary, the code will actually use the
-SSE2 version of the algorithm since using the AVX512f or AVX2 versions would
-have resulted in a segmentation violation.
+buffer address need to be zero). For AVX2 instructions 32-byte alignment is
+needed, and for SSE2 instructions 16-byte alignment. The scalar version can work
+on any buffer alignment (even odd addresses). If the buffer is not correctly
+aligned, the code will automatically revert to a lower algorithm that does
+support the provided buffer alignment. For instance, if the hardware supports
+AVX512f instructions, but the buffer is aligned on a 16-byte boundary, the code
+will actually use the SSE2 version of the algorithm since using the AVX512f or
+AVX2 versions would have resulted in a segmentation violation.
 
 In Linux, <tt>malloc()</tt> will typically return buffers aligned on a 16-byte
 boundary, so special measures are needed to obtain buffers on a 32- or 64-byte

@@ -77,13 +77,12 @@ void EXT(VectorHashFinalize)(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h
 		z[j++] = &h4[i*nn];
 
 	// fold the result to the desired hash width
-	uint32_t narr = vh_hash_width/32;
-	uint32_t nelem = 4*vh_virtreg_width/vh_hash_width;
-	for( uint32_t i=0; i < narr; i++ )
+	size_t ns2 = vh_nstate/2;
+	for( uint32_t i=0; i < vh_nstate; i++ )
 	{
-		res[i] = z[i][0];
-		for( size_t j=1; j < nelem; j++ )
-			res[i] ^= z[(j+i)%narr][j];
+		res[i] = fmix32(z[i][0] ^ z[(i+ns2)%vh_nstate][nn-1]);
+		for( size_t j=1; j < nn; j++ )
+			res[i] ^= fmix32(z[(j+i)%vh_nstate][j] ^ z[(j+i+ns2)%vh_nstate][nn-1-j]);
 	}
 }
 
