@@ -16,29 +16,29 @@ namespace {
 	TEST(TestZeroLengthBufferScalar_128)
 	{
 		VectorHash32_128(buffer, 0, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "30a574ab9824cb4358b310345eb60ab0") );
+		CHECK( CheckHash(cksum, "fe82e7d9998e9819c7ac954ea0a0ea8e") );
 	}
 
 	TEST(TestZeroLengthBufferScalar_256)
 	{
 		VectorHash32_256(buffer, 0, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "bb92155ef2049290deea8ca97f4d88d39c0f2490b49e30c483c26086ede6520a") );
+		CHECK( CheckHash(cksum, "c87638f19f1778d7ee03dddc5c6677fd0701e532d311bfffddfc21c0ece8910a") );
 	}
 
 	TEST(TestZeroLengthBufferScalar_512)
 	{
 		VectorHash32_512(buffer, 0, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "0bf187c2657c96361df020771e2ef920513ad53d86fae25a99b1f9f5c76b7aa7"
-		                        "2281c0e4c16318bd92fb5627c61677a09da0f950210f5f9f4a4ebf7e9a5ff0dc") );
+		CHECK( CheckHash(cksum, "280f647d93f843b75627cc8c437084e2668a3cd9e077a2cf3186c67c990983c2"
+		                        "8ff8180187d362a79cb02cb49ba350a5e185e0050fc273e836b1db30571cfa66") );
 	}
 
 	TEST(TestZeroLengthBufferScalar_1024)
 	{
 		VectorHash32_1024(buffer, 0, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "65ab6b7d081119602b80cdd8296d732f682986d56277d990bb4a002f5ad2eca0"
-		                        "dd963bf652c3a82dea739e42774b49a035760ccbddae9c4641757d7bd7e04f48"
-		                        "a72b89039e1a2dbebb140f3e83813d85f637d5195c3f9c5f023510df0b94f81d"
-		                        "275bc94224ceb3b9256ea207318abddbba5e04c9fcd8e8725253652d1c55f3ae") );
+		CHECK( CheckHash(cksum, "c38bd292e55400931e47f4397b5266b3e143ffd918fb944c33ad908458a08c62"
+		                        "65e9c28007bf68301ab6f68c82ddcc2fa993ad69556b9ab4d588594ac4d02b5d"
+		                        "dd083a4cf1418b6522f06bff90a67bf93faaa719e1dbdbda3592deddbd1a8378"
+		                        "f0993653e73c292f338729c1efe01b352e90ed9a0ae01e613ad72736db619b2d") );
 	}
 
 	// test half a blocksize
@@ -46,32 +46,32 @@ namespace {
 	{
 		CHECK( ReadBuffer("test0128", 128, buffer) );
 		VectorHash32_128(buffer, 128, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "1fdd011c819e318cbb24f4e7dd2e5421") );
+		CHECK( CheckHash(cksum, "970566856108ce7bce658104386829fa") );
 	}
 
 	TEST(Test128ByteBufferScalar_256)
 	{
 		CHECK( ReadBuffer("test0128", 128, buffer) );
 		VectorHash32_256(buffer, 128, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "d219785d3819b42292b1195cbcd407addb2bdd52fbf8dc43f7521c98ebad5f51") );
+		CHECK( CheckHash(cksum, "630b825fec4275e28b02590c53db6d920e3647133d5300a1e2887861867dfcf0") );
 	}
 
 	TEST(Test256ByteBufferScalar_512)
 	{
 		CHECK( ReadBuffer("test0256", 256, buffer) );
 		VectorHash32_512(buffer, 256, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "df76c929147743beb82c14d8aa9168ce05b3648460da5770ce720a88737aa2e3"
-		                        "9b8fcef343ab8993ab981878ea0b94ed9be2014b8099399cd41ffa4972cd05f7") );
+		CHECK( CheckHash(cksum, "f0ef0c9efd9c02c38be2f2687ac20acee763fe6063829747aace159ddcdc7470"
+		                        "a7e4cdbd00c7ed0fbc30c8810fd35b73f7b65e5242369a63d3ea6c2e7c0ae56e") );
 	}
 
 	TEST(Test512ByteBufferScalar_1024)
 	{
 		CHECK( ReadBuffer("test0512", 512, buffer) );
 		VectorHash32_1024(buffer, 512, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "625d7810e2315de7875b0c47a5657d4caf5a672b8b3d155856b5b7e065b55c25"
-		                        "0a95071b8159c0d7a4bba19c6fac3c089136166f01bcffee2021e95be5c30766"
-		                        "534ffa4313a07314da701c6e2255bfb0dd90f0005ae8f73327696a95638aeaa0"
-		                        "e9331eef20ca8016499c4ac548b00d4a7da04afde66519ab8ae5461d500f0006") );
+		CHECK( CheckHash(cksum, "4f3d9728dfadf99677de56e642fc5990e3133fe2008cf431c93931011d66f373"
+		                        "4d9ed038d6d581f5e8bf073cec644d564455bbae6c70c9a5d1bd3631835478b2"
+		                        "bec773a1c1daecd260ca92cdaade67869c03e4fc5cd1f14d50addab0d34aa534"
+		                        "5e1b103946534375900f08abd8195b9bf22592eb44bbc1fc37eb1d6e5039014e") );
 	}
 
 	// test one blocksize
@@ -79,32 +79,32 @@ namespace {
 	{
 		CHECK( ReadBuffer("test0256", 256, buffer) );
 		VectorHash32_128(buffer, 256, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "f6abb56afb29301b5d9ea79fa7c239e4") );
+		CHECK( CheckHash(cksum, "b384fcaef98a474cd776074b9d78bca9") );
 	}
 
 	TEST(Test256ByteBufferScalar_256)
 	{
 		CHECK( ReadBuffer("test0256", 256, buffer) );
 		VectorHash32_256(buffer, 256, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "fa0040151e96185570d156c1b5727ec5abfe80e90ae45544badcf930cd2d47d3") );
+		CHECK( CheckHash(cksum, "96750ccd5f66ee6fcf17f512abecd3339e487a437976ad5947589e070d8e8d9e") );
 	}
 
 	TEST(Test512ByteBufferScalar_512)
 	{
 		CHECK( ReadBuffer("test0512", 512, buffer) );
 		VectorHash32_512(buffer, 512, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "ea1391390c88e41067dbd0f877c9af1a95295eb64c6f3f9b8a920613cc63b446"
-		                        "b36d5bae4bc9f4c0a8a0376848269c8957cf38579c75f207821d91b45025f123") );
+		CHECK( CheckHash(cksum, "e6ad8e7d595ad7e025cce2f56aea6fdc01c75ac38d68234a6f4b0ce5fb335dcb"
+		                        "7790464c11cb5f00e5c15559911784f11f12ac10a75ccd3208f0f99e4a35ac4b") );
 	}
 
 	TEST(Test1024ByteBufferScalar_1024)
 	{
 		CHECK( ReadBuffer("test1024", 1024, buffer) );
 		VectorHash32_1024(buffer, 1024, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "5627edb8658b286cc023cf5295490129f86caf3fef22c569351b22c315e2410c"
-		                        "79e6c324e4e62b95ccdbc60d2b3edec2009898d27cd964a4fa3a3429ebb42b3e"
-		                        "76033b927653b916fc8a96c9ea0f51cad0a87a79bc9632aa31f3975b9c310fe8"
-		                        "b59d388420b5ed788dcd0cfcbb585f022c692253c4f6b618efa47923853a8f9f") );
+		CHECK( CheckHash(cksum, "7cb508d7ccd3d6d7d025af8bfa7e6bafdad15d789ff09b0ee3e4e16de58ec936"
+		                        "01ece64099f0273ab5f847c6907fb0a65ae1571a6a4a17ca98376173a71c6635"
+		                        "8f8886bb85cb56185a6a09b315cd1a9494b68a913bb15d4a969a2312f801af24"
+		                        "c6f293256f2feb733d957a3f95a195e2cb91b6202e321258a653a94cad0c8753") );
 	}
 
 	// test 3/2 blocksizes
@@ -112,32 +112,32 @@ namespace {
 	{
 		CHECK( ReadBuffer("test0384", 384, buffer) );
 		VectorHash32_128(buffer, 384, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "9d7bb6d9506f3bd52d39ab74eef95c88") );
+		CHECK( CheckHash(cksum, "00d2ad3ff87e9969156227bcedce13ea") );
 	}
 
 	TEST(Test384ByteBufferScalar_256)
 	{
 		CHECK( ReadBuffer("test0384", 384, buffer) );
 		VectorHash32_256(buffer, 384, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "577bbf1d4f48a54c9690257807fcaa25f2fdf4066ffc824a88e8162592628f95") );
+		CHECK( CheckHash(cksum, "6838a170786ba5b21c0bce56feda9028749a294162501d660ad4ecdeee9c8245") );
 	}
 
 	TEST(Test768ByteBufferScalar_512)
 	{
 		CHECK( ReadBuffer("test0768", 768, buffer) );
 		VectorHash32_512(buffer, 768, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "5a60e8b008cec8ee86ef487b09309ae320bb2ef01cfd605bd06c2d50b31b1f62"
-		                        "bea5f235de35a1863895933a52483a1d6568e4b2fc95ebb619059d9e6cd3e32c") );
+		CHECK( CheckHash(cksum, "57c8793d85812151b68a835a9ae6654b08d1ccc59a70118f4d6a6bd46be0e3f7"
+		                        "ae3c9f83fab4d27dd9254a80ccde663d43a9ed48000f82f5b8fefcbdf0251957") );
 	}
 
 	TEST(Test1536ByteBufferScalar_1024)
 	{
 		CHECK( ReadBuffer("test1536", 1536, buffer) );
 		VectorHash32_1024(buffer, 1536, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "a96be49fa0e0aa28d01c0e629a191fd8bbe193dbdcf513623544f1e27fec4434"
-		                        "b598fc6ec746157f55a8ea38ed883dbd96f5523a44e8d873f48b15143ac4978e"
-		                        "8b98d9357b8184dc0e6dd1b6e95042d524ec0837763af3c11a751943fe1c117f"
-		                        "a5ffac5121aaa2e617db2665d097d3df5295c8b912faef64ca3e1ca65f9c6611") );
+		CHECK( CheckHash(cksum, "9377ee81b5ee4163f6213f395df47551a46ae82ca78b8bcd5c0e49c0606b7136"
+		                        "be2dfb4949aa69e59d2ab4809cdc3b4676d133ca8a8ef884c88e93ce6add5875"
+		                        "1fe5a21aeb0375d98299cff1634fa10bb4032a4912fe6ea18487c6e9eaab7cb0"
+		                        "e0c9edbb5276ae17bf089013eb027c459db57c491d9bba404e365787eff9dafe") );
 	}
 
 	// test a large buffer
@@ -145,32 +145,32 @@ namespace {
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
 		VectorHash32_128(buffer, 1048576, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "dad2070b6fbec87754130ef0a5f22b4a") );
+		CHECK( CheckHash(cksum, "5c3c9fb8481be32ea676886ab251f4fc") );
 	}
 
 	TEST(TestLargeBufferScalar_256)
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
 		VectorHash32_256(buffer, 1048576, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "8c6ae4f3dcaa62bb19c7d05ace46dcf69bd5048e8179000fcdc9e50514a981a6") );
+		CHECK( CheckHash(cksum, "888a7ef5d0feda6a571ca947ece56c8833019cc8dca62dad01e6f9e60dcc29d3") );
 	}
 
 	TEST(TestLargeBufferScalar_512)
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
 		VectorHash32_512(buffer, 1048576, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "677069f5cf26c1a626dfef47d35e697df34c8f3cb592b17681307a9aec2af589"
-		                        "91d7fe9dc768cdeee144105627eb1ed687bd26eeb14b43025d754bf2fb3c8cb5") );
+		CHECK( CheckHash(cksum, "147c905b96a3e78f458bb56cbab1f17c843f70d485b24bfa51d1823602481eea"
+		                        "7890edaf1575a8ef04a57c92fc86353ff5c48c3c8198762f6b409d9aa52bff52") );
 	}
 
 	TEST(TestLargeBufferScalar_1024)
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
 		VectorHash32_1024(buffer, 1048576, 0xfd4c799d, cksum);
-		CHECK( CheckHash(cksum, "181ea4a710cb01cd12f038f3b4df6760fc1fda8c3424f528ae8e82b0d4762980"
-		                        "026c0314630da65b5b3a2dc002fe8d65276a0ee974cee5fa422440a324d7b937"
-		                        "72dfa9625cf6c023ca0c4c102f4a148add77413c9637d03603565da7ff98a626"
-		                        "22f2934cbae7e6139821a8cf2771f6d6a8228b6fe04df09544f485ac5d4c3531") );
+		CHECK( CheckHash(cksum, "3dfe155d7c8fab0ccf04baf748bf2bd9a0dd00924eb7d3ba94af78ba1976232f"
+		                        "a4ec9c46080893e4321601b07f0e7aeac6a4ab010e505d443889fc978b23b0f9"
+		                        "44ca22d4e4f6079b94b8985dd1adc1b13f4d2a2c08dd53e22f3bb84eb0fbab75"
+		                        "06eff60a3089394a57f98b532a89cd66c7d6d2da971025c0cad83c09a3aa3d21") );
 	}
 
 	// test alternative seed
@@ -178,32 +178,32 @@ namespace {
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
 		VectorHash32_128(buffer, 1048576, 0x6ec74615, cksum);
-		CHECK( CheckHash(cksum, "27a01fc4e77102052e8a2365a34e0e13") );
+		CHECK( CheckHash(cksum, "b26873b350a8095d2ded60d9cf2d1a37") );
 	}
 
 	TEST(TestLargeBufferAltSeedScalar_256)
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
 		VectorHash32_256(buffer, 1048576, 0x6ec74615, cksum);
-		CHECK( CheckHash(cksum, "b0e45309215ec0f2b081bceb972dc7c2893c5ddeb78d0d0be2b1c7c327034f73") );
+		CHECK( CheckHash(cksum, "79c87bd2c4d5368c277c9fc2b1b871f0ec6077b3a129a62bdcd4bee3ba44cc17") );
 	}
 
 	TEST(TestLargeBufferAltSeedScalar_512)
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
 		VectorHash32_512(buffer, 1048576, 0x6ec74615, cksum);
-		CHECK( CheckHash(cksum, "67559c4b5fae5379e58577aeb97252436f31a6dc7d66077d978367da6ac1a34f"
-		                        "ffb8cef8db00f900003c90a2ce718686bade1a13e35d80ab5226cbbcf35f6035") );
+		CHECK( CheckHash(cksum, "4661b2e71c540ad70f9234124d20482dcf891cbd727933cb9a574448d66407aa"
+		                        "e4b3f7b34c200e84efd84a82ab6f26bf8796dd57ea89503bb62369dcde5cd921") );
 	}
 
 	TEST(TestLargeBufferAltSeedScalar_1024)
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
 		VectorHash32_1024(buffer, 1048576, 0x6ec74615, cksum);
-		CHECK( CheckHash(cksum, "ec67116d32b6d835a99c41cac254a561b9f20e792cfdf33e6905d03fee7686e1"
-		                        "a60c6ac5f5bdf359d318043b3a15a8723c606fbccf57725697c37184916d43f1"
-		                        "ffbc74ba744ab302ce9b38947e87a5d8923759058191fd2bb4a2f301d8834dfe"
-		                        "6d0a4ed08680ab3106a5b06ca13d915680079f4f6eefa1376947a64660285e33") );
+		CHECK( CheckHash(cksum, "6874b6e17181cade7bef55f316ee4df8bfb48131baca25484f97bf5234650fc3"
+		                        "4873d6ae572d07fa01df034e45a62db004f32f7871427c0db41dd758ee32f0c3"
+		                        "64bbd5c252b0d96e658c2c183202d8528530a57fc21dc074274f2e24e0abdb2a"
+		                        "8126b974494c396114937f68312a076c898554e460dda37fc5e103ef5ee79f1e") );
 	}
 
 }
