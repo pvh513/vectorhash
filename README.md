@@ -28,9 +28,16 @@ written by Austin Appleby (for the finalization mix and some support routines).
 
 The algorithm can produce 128-, 256-, 512-, or 1024-bit checksums. It has been
 extensively tested against SMHasher written by ZhuReini Urban and all versions
-pass all the tests using a 2018 version of SMHasher. The test harness can be
-found [in this repository](https://github.com/rurban/smhasher). The output of
-the test runs is provided on the web site.
+pass all the tests using commit 83fd13bc of SMHasher, except for the speed test.
+The latter fails because it measures the speed for hashing very small keys,
+which is not what the algorithm is designed for as was already explained above.
+The test harness can be found [in this
+repository](https://github.com/rurban/smhasher). The output of the test runs is
+here:
+[128bit](https://gitlab-as.oma.be/-/project/876/uploads/24045262a738d56a503362a224cb3ab7/test_results_83fd13bc_128bit.txt),
+[256bit](https://gitlab-as.oma.be/-/project/876/uploads/e1c89df1dd45314d975e7108e495cd5a/test_results_83fd13bc_256bit.txt),
+[512bit](https://gitlab-as.oma.be/-/project/876/uploads/4c137ca1af293c22be639a68fa056add/test_results_83fd13bc_512bit.txt),
+[1024bit](https://gitlab-as.oma.be/-/project/876/uploads/98be7f8ff5bfc89119bebf185aa287f9/test_results_83fd13bc_1024bit.txt).
 
 ### Command line routines
 
