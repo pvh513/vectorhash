@@ -39,7 +39,10 @@ static const string vh_version( "0.1" );
 
 // width of the hash (in bits)
 // this value MUST be a power of 2 with a minimum of 128
-#if defined(VH128)
+#if defined(VH64)
+static const size_t vh_hash_width = 64;
+#define EXT(X) X##_64
+#elif defined(VH128)
 static const size_t vh_hash_width = 128;
 #define EXT(X) X##_128
 #elif defined(VH256)

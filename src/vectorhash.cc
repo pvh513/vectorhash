@@ -71,8 +71,8 @@ struct vh_params {
 	bool set_hash_width(size_t hw)
 	{
 		// width of the hash (in bits)
-		// this value MUST be a power of 2 between 128 and 1024
-		if( hw < 128 || hw > 1024 || ((hw & (hw-1)) != 0) )
+		// this value MUST be a power of 2 between 64 and 1024
+		if( hw < 64 || hw > 1024 || ((hw & (hw-1)) != 0) )
 			return false;
 		vh_hash_width = hw;
 		// width of the virtual SIMD register supported in VectorHash (in bits)
@@ -243,7 +243,9 @@ static string VHstdin(const vh_params& vhp)
 	}
 	posix_memalign_free( map );
 
-	if( vhp.vh_hash_width == 128 )
+	if( vhp.vh_hash_width == 64 )
+		VectorHashFinalize_64(len, z1, z2, z3, z4, (void*)state);
+	else if( vhp.vh_hash_width == 128 )
 		VectorHashFinalize_128(len, z1, z2, z3, z4, (void*)state);
 	else if( vhp.vh_hash_width == 256 )
 		VectorHashFinalize_256(len, z1, z2, z3, z4, (void*)state);
@@ -342,7 +344,7 @@ static void PrintHelp(const vh_params& vhp)
 	cout << "  -t, --text            read FILE in text mode (default)\n";
 	cout << "  -z, --zero            end each output line with NUL, not newline,\n";
 	cout << "                        and disable file name escaping\n";
-	cout << "  -l, --length          set checksum width (allowed values 128, 256, 512, or 1024)\n";
+	cout << "  -l, --length          set checksum width (allowed values 64, 128, 256, 512, or 1024)\n";
 	cout << "      --                this flag terminates the list of OPTIONs, allowing FILE\n";
 	cout << "                        names starting with \"-\" to be used after this flag\n"; 
 	cout << endl;
@@ -726,7 +728,9 @@ int main(int argc, char** argv)
 	vh_params vhp;
 	vhp.cmd = argv[0];
 	// no need to check for "128", it is the default
-	if( vhp.cmd.find("256") != string::npos )
+	if( vhp.cmd.find("64") != string::npos )
+		vhp.set_hash_width(64);
+	else if( vhp.cmd.find("256") != string::npos )
 		vhp.set_hash_width(256);
 	else if( vhp.cmd.find("512") != string::npos )
 		vhp.set_hash_width(512);
@@ -794,7 +798,7 @@ int main(int argc, char** argv)
 						if( !vhp.set_hash_width(hw) )
 						{
 							cout << vhp.cmd << ": invalid length: \'" << hw << "\'\n";
-							cout << vhp.cmd << ": length must be 128, 256, 512, or 1024\n";
+							cout << vhp.cmd << ": length must be 64, 128, 256, 512, or 1024\n";
 							return 1;
 						}
 						j = arg.length();
@@ -856,7 +860,7 @@ int main(int argc, char** argv)
 				if( !vhp.set_hash_width(hw) )
 				{
 					cout << vhp.cmd << ": invalid length: \'" << hw << "\'\n";
-					cout << vhp.cmd << ": length must be 128, 256, 512, or 1024\n";
+					cout << vhp.cmd << ": length must be 64, 128, 256, 512, or 1024\n";
 					return 1;
 				}
 			}
