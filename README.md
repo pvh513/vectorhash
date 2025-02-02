@@ -26,7 +26,7 @@ Sebastiano Vigna (for the core of the hashing function) and
 [MurmurHash3](https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp)
 written by Austin Appleby (for the finalization mix and some support routines).
 
-The algorithm can produce 128-, 256-, 512-, or 1024-bit checksums. It has been
+The algorithm can produce 64-, 128-, 256-, 512-, or 1024-bit checksums. It has been
 extensively tested against SMHasher written by ZhuReini Urban and all versions
 pass all the tests using commit 83fd13bc of SMHasher, except for the speed test.
 The latter fails because it measures the speed for hashing very small keys,
@@ -42,7 +42,7 @@ here:
 ### Command line routines
 
 After building and installing the code (see the separate file INSTALL.md for
-this) you will have four executables called vh128sum, vh256sum, vh512sum, and
+this) you will have five executables called vh64sum, vh128sum, vh256sum, vh512sum, and
 vh1024sum. These can produce checksums of any given file. They are designed to
 be a plug-in replacement for other well-known checksum algorithms. The actual
 checksums will be different of course, but the aim is to replicate all command
@@ -53,8 +53,8 @@ all remarks apply implicitly to the other three executables as well.
 
 The four executables are in fact identical and are hard links to each other. The
 code determines the width of the checksum by looking at the name of the
-executable. If that name contains the string "128" it will produce a 128-bit
-executable, and similarly for 256-, 512-, and 1024-bit checksums. Other widths
+executable. If that name contains the string "64" it will produce a 64-bit
+executable, and similarly for 128-, 256-, 512-, and 1024-bit checksums. Other widths
 of the checksum are not supported. If it is not possible to determine the width
 of the checksum this way, the width will default to 128 bits. It is also
 possible to force the width with command line flags, e.g. the command vh128sum
@@ -75,10 +75,13 @@ instructions. You will get a crash on an illegal instruction in the latter case.
 These flags are intended for testing and debugging and should not be needed in a
 normal production environment.
 
-The command vh128 \--help will give a complete overview of all flags that are
+The command vh128sum \--help will give a complete overview of all flags that are
 supported.
 
 The checksums of an empty file are as follows:
+
+64 bit:
+<tt>73711a77d6031b6f</tt>
 
 128 bit:   
 <tt>fe82e7d9998e9819c7ac954ea0a0ea8e</tt>
@@ -110,7 +113,7 @@ checksummed, <tt>len</tt> is the length of the buffer, <tt>seed</tt> is the seed
 for the checksum algorithm (use 0xfd4c799d to replicate the behavior of
 vh128sum, etc, but any other value is fine too), <tt>out</tt> is a pointer to
 the buffer that will be used to write the checksum into, and <tt>hw</tt> is the
-width of the checksum (allowed values are 128, 256, 512, and 1024). The
+width of the checksum (allowed values are 64, 128, 256, 512, and 1024). The
 declaration is contained in the header file <tt>vectorhash.h</tt>. A very simple
 program using this library could contain:
 

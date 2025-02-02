@@ -13,7 +13,7 @@ On some operating systems you may have to use <tt> gmake</tt> instead of
 
 	make -j16
 
-The build will create four executables called vh128sum, vh256sum, vh512sum, and
+The build will create five executables called vh64sum, vh128sum, vh256sum, vh512sum, and
 vh1024sum. These are hard-linked to each other, so they really only take up the
 space of one executable. The Makefile is set up to use the GNU compiler g++. It
 is straightforward to use the LLVM compiler clang++ instead:

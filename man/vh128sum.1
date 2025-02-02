@@ -1,7 +1,10 @@
 .TH vh128sum "1" "January 2025" "Peter van Hoof" "User Commands"
 .SH NAME
-vh128sum, vh256sum, vh512sum, vh1024sum \- compute or check VectorHash checksums
+vh64sum, vh128sum, vh256sum, vh512sum, vh1024sum \- compute or check VectorHash checksums
 .SH SYNOPSIS
+.B vh64sum
+[\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
+.br
 .B vh128sum
 [\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
 .br
@@ -14,7 +17,7 @@ vh128sum, vh256sum, vh512sum, vh1024sum \- compute or check VectorHash checksums
 .B vh1024sum
 [\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
 .SH DESCRIPTION
-Compute or check 128-, 256-, 512-, or 1024-bit VectorHash checksums. In this
+Compute or check 64-, 128-, 256-, 512-, or 1024-bit VectorHash checksums. In this
 document hash is used as a synonym for checksum.
 .PP
 VectorHash is a very fast, non-cryptographic checksum algorithm. It has in part
@@ -77,7 +80,7 @@ set the width of the checksum (in bits). Normally the width of the checksum
 is determined from the name of the executable by looking for a number embedded
 in the name. If that fails, the width will default to 128 bits. With this
 OPTION it is possible to explicitly set the width of the checksum. Allowed
-values are 128, 256, 512, or 1024.
+values are 64, 128, 256, 512, or 1024.
 .TP
 \fB\-q\fR, \fB\-\-quiet\fR
 don't print OK for each successfully verified file.
