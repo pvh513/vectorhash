@@ -53,7 +53,9 @@ is_type GetSIMDVersion()
 void VectorHashBody32(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[],
 					  size_t hash_width)
 {
-	if( hash_width == 64 )
+	if( hash_width == 32 )
+		VectorHashBody32_32(data, h1, h2, h3, h4);
+	else if( hash_width == 64 )
 		VectorHashBody32_64(data, h1, h2, h3, h4);
 	else if( hash_width == 128 )
 		VectorHashBody32_128(data, h1, h2, h3, h4);
@@ -71,7 +73,9 @@ void VectorHashBody32(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32
 
 void VectorHashBody128(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[], size_t hash_width)
 {
-	if( hash_width == 64 )
+	if( hash_width == 32 )
+		VectorHashBody128_32(data, h1, h2, h3, h4);
+	else if( hash_width == 64 )
 		VectorHashBody128_64(data, h1, h2, h3, h4);
 	else if( hash_width == 128 )
 		VectorHashBody128_128(data, h1, h2, h3, h4);
@@ -89,7 +93,9 @@ void VectorHashBody128(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h
 
 void VectorHashBody256(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[], size_t hash_width)
 {
-	if( hash_width == 64 )
+	if( hash_width == 32 )
+		VectorHashBody256_32(data, h1, h2, h3, h4);
+	else if( hash_width == 64 )
 		VectorHashBody256_64(data, h1, h2, h3, h4);
 	else if( hash_width == 128 )
 		VectorHashBody256_128(data, h1, h2, h3, h4);
@@ -107,7 +113,9 @@ void VectorHashBody256(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h
 
 void VectorHashBody512(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v16si h4[], size_t hash_width)
 {
-	if( hash_width == 64 )
+	if( hash_width == 32 )
+		VectorHashBody512_32(data, h1, h2, h3, h4);
+	else if( hash_width == 64 )
 		VectorHashBody512_64(data, h1, h2, h3, h4);
 	else if( hash_width == 128 )
 		VectorHashBody512_128(data, h1, h2, h3, h4);
@@ -125,7 +133,9 @@ void VectorHashBody512(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v1
 
 static void VectorHash32(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
-	if( hash_width == 64 )
+	if( hash_width == 32 )
+		VectorHash32_32(buf, len, seed, out);
+	else if( hash_width == 64 )
 		VectorHash32_64(buf, len, seed, out);
 	else if( hash_width == 128 )
 		VectorHash32_128(buf, len, seed, out);
@@ -143,7 +153,9 @@ static void VectorHash32(const void* buf, size_t len, uint32_t seed, void* out, 
 
 static void VectorHash128(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
-	if( hash_width == 64 )
+	if( hash_width == 32 )
+		VectorHash128_32(buf, len, seed, out);
+	else if( hash_width == 64 )
 		VectorHash128_64(buf, len, seed, out);
 	else if( hash_width == 128 )
 		VectorHash128_128(buf, len, seed, out);
@@ -161,7 +173,9 @@ static void VectorHash128(const void* buf, size_t len, uint32_t seed, void* out,
 
 static void VectorHash256(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
-	if( hash_width == 64 )
+	if( hash_width == 32 )
+		VectorHash256_32(buf, len, seed, out);
+	else if( hash_width == 64 )
 		VectorHash256_64(buf, len, seed, out);
 	else if( hash_width == 128 )
 		VectorHash256_128(buf, len, seed, out);
@@ -179,7 +193,9 @@ static void VectorHash256(const void* buf, size_t len, uint32_t seed, void* out,
 
 static void VectorHash512(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
 {
-	if( hash_width == 64 )
+	if( hash_width == 32 )
+		VectorHash512_32(buf, len, seed, out);
+	else if( hash_width == 64 )
 		VectorHash512_64(buf, len, seed, out);
 	else if( hash_width == 128 )
 		VectorHash512_128(buf, len, seed, out);
