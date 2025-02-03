@@ -9,13 +9,14 @@
 
 #include <iostream>
 #include <iomanip>
-#include <stdint.h>
+#include <cstdint>
 #include <cstdio>
 #include <string>
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
 #include <regex>
+#include <vector>
 
 #if defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
 #include <unistd.h>
@@ -156,13 +157,13 @@ static string VHstream(const vh_params& vhp, FILE* io)
 	long fsize = ftell(io);
 	if( fsize < 0 )
 		return string();
+	vector<uint32_t> state(vhp.vh_nstate);
 #if _POSIX_MAPPED_FILES > 0
 	int fd = fileno(io);
 	char* map = ( fsize > 0 ) ? (char*)mmap( NULL, fsize, PROT_READ, MAP_SHARED, fd, 0 ) : nullptr;
 	if( fsize > 0 && map == MAP_FAILED )
 		return string();
-	uint32_t state[vhp.vh_nstate];
-	VectorHash( map, fsize, vhp.seed, state, vhp.SIMDversion, vhp.vh_hash_width );
+	VectorHash( map, fsize, vhp.seed, state.data(), vhp.SIMDversion, vhp.vh_hash_width );
 	munmap(map, fsize);
 #else
 	if( fseek( io, 0, SEEK_SET ) != 0 )
@@ -175,8 +176,7 @@ static string VHstream(const vh_params& vhp, FILE* io)
 		if( fread( map, fsize, 1, io ) != 1 )
 			return string();
 	}
-	uint32_t state[vhp.vh_nstate];
-	VectorHash( map, fsize, vhp.seed, state, vhp.SIMDversion, vhp.vh_hash_width );
+	VectorHash( map, fsize, vhp.seed, state.data(), vhp.SIMDversion, vhp.vh_hash_width );
 	if( map != NULL )
 		posix_memalign_free( map );
 #endif
@@ -217,7 +217,7 @@ static string VHstdin(const vh_params& vhp)
 	void* map = NULL;
 	if( posix_memalign( &map, vh_hwreg_width/8, vhp.blocksize ) != 0 )
 		return string();
-	uint32_t state[vhp.vh_nstate];
+	vector<uint32_t> state(vhp.vh_nstate);
 	size_t len = 0, bsize;
 	while( true )
 	{
@@ -244,17 +244,17 @@ static string VHstdin(const vh_params& vhp)
 	posix_memalign_free( map );
 
 	if( vhp.vh_hash_width == 32 )
-		VectorHashFinalize_32(len, z1, z2, z3, z4, (void*)state);
+		VectorHashFinalize_32(len, z1, z2, z3, z4, state.data());
 	else if( vhp.vh_hash_width == 64 )
-		VectorHashFinalize_64(len, z1, z2, z3, z4, (void*)state);
+		VectorHashFinalize_64(len, z1, z2, z3, z4, state.data());
 	else if( vhp.vh_hash_width == 128 )
-		VectorHashFinalize_128(len, z1, z2, z3, z4, (void*)state);
+		VectorHashFinalize_128(len, z1, z2, z3, z4, state.data());
 	else if( vhp.vh_hash_width == 256 )
-		VectorHashFinalize_256(len, z1, z2, z3, z4, (void*)state);
+		VectorHashFinalize_256(len, z1, z2, z3, z4, state.data());
 	else if( vhp.vh_hash_width == 512 )
-		VectorHashFinalize_512(len, z1, z2, z3, z4, (void*)state);
+		VectorHashFinalize_512(len, z1, z2, z3, z4, state.data());
 	else if( vhp.vh_hash_width == 1024 )
-		VectorHashFinalize_1024(len, z1, z2, z3, z4, (void*)state);
+		VectorHashFinalize_1024(len, z1, z2, z3, z4, state.data());
 	else {
 		cout << "Internal error: impossible value for hash width: " << vhp.vh_hash_width << "." << endl;
 		exit(1);

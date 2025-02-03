@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -std=c++11 -O3 -funroll-loops
+CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops
 LDFLAGS = -lvhsum -L.
 
 INSTALLDIR = /usr/local
