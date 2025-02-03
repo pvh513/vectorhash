@@ -13,6 +13,12 @@
 namespace {
 
 	// test empty buffer
+	TEST(TestZeroLengthBufferScalar_32)
+	{
+		VectorHash32_32(buffer, 0, 0xfd4c799d, cksum);
+		CHECK( CheckHash(cksum, "7647d9bd") );
+	}
+
 	TEST(TestZeroLengthBufferScalar_64)
 	{
 		VectorHash32_64(buffer, 0, 0xfd4c799d, cksum);
@@ -48,6 +54,13 @@ namespace {
 	}
 
 	// test half a blocksize
+	TEST(Test128ByteBufferScalar_32)
+	{
+		CHECK( ReadBuffer("test0128", 128, buffer) );
+		VectorHash32_32(buffer, 128, 0xfd4c799d, cksum);
+		CHECK( CheckHash(cksum, "50c5164c") );
+	}
+
 	TEST(Test128ByteBufferScalar_64)
 	{
 		CHECK( ReadBuffer("test0128", 128, buffer) );
@@ -88,6 +101,13 @@ namespace {
 	}
 
 	// test one blocksize
+	TEST(Test256ByteBufferScalar_32)
+	{
+		CHECK( ReadBuffer("test0256", 256, buffer) );
+		VectorHash32_32(buffer, 256, 0xfd4c799d, cksum);
+		CHECK( CheckHash(cksum, "0eabedeb") );
+	}
+
 	TEST(Test256ByteBufferScalar_64)
 	{
 		CHECK( ReadBuffer("test0256", 256, buffer) );
@@ -128,6 +148,13 @@ namespace {
 	}
 
 	// test 3/2 blocksizes
+	TEST(Test384ByteBufferScalar_32)
+	{
+		CHECK( ReadBuffer("test0384", 384, buffer) );
+		VectorHash32_32(buffer, 384, 0xfd4c799d, cksum);
+		CHECK( CheckHash(cksum, "7273a9bf") );
+	}
+
 	TEST(Test384ByteBufferScalar_64)
 	{
 		CHECK( ReadBuffer("test0384", 384, buffer) );
@@ -168,6 +195,13 @@ namespace {
 	}
 
 	// test a large buffer
+	TEST(TestLargeBufferScalar_32)
+	{
+		CHECK( ReadBuffer("test9999", 1048576, buffer) );
+		VectorHash32_32(buffer, 1048576, 0xfd4c799d, cksum);
+		CHECK( CheckHash(cksum, "81dddc5e") );
+	}
+
 	TEST(TestLargeBufferScalar_64)
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );
@@ -208,6 +242,13 @@ namespace {
 	}
 
 	// test alternative seed
+	TEST(TestLargeBufferAltSeedScalar_32)
+	{
+		CHECK( ReadBuffer("test9999", 1048576, buffer) );
+		VectorHash32_32(buffer, 1048576, 0x6ec74615, cksum);
+		CHECK( CheckHash(cksum, "2717e727") );
+	}
+
 	TEST(TestLargeBufferAltSeedScalar_64)
 	{
 		CHECK( ReadBuffer("test9999", 1048576, buffer) );

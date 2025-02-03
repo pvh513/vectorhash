@@ -91,7 +91,7 @@ struct vh_params {
 				  lgWarnSyntax(false), lgVerbose(false), lgZero(false), SIMDversion(IS_INVALID),
 				  returncode(0), seed(0xfd4c799d)
 	{
-		(void)set_hash_width(128);
+		(void)set_hash_width(32);
 	}
 	char sentinel() const { return lgBinary ? '*' : ' '; }
 	string option() const { return lgBinary ? "rb" : "r"; }
@@ -729,11 +729,11 @@ int main(int argc, char** argv)
 {
 	vh_params vhp;
 	vhp.cmd = argv[0];
-	// no need to check for "128", it is the default
-	if( vhp.cmd.find("32") != string::npos )
-		vhp.set_hash_width(32);
-	else if( vhp.cmd.find("64") != string::npos )
+	// no need to check for "32", it is the default
+	if( vhp.cmd.find("64") != string::npos )
 		vhp.set_hash_width(64);
+	else if( vhp.cmd.find("128") != string::npos )
+		vhp.set_hash_width(128);
 	else if( vhp.cmd.find("256") != string::npos )
 		vhp.set_hash_width(256);
 	else if( vhp.cmd.find("512") != string::npos )

@@ -26,14 +26,16 @@ Sebastiano Vigna (for the core of the hashing function) and
 [MurmurHash3](https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp)
 written by Austin Appleby (for the finalization mix and some support routines).
 
-The algorithm can produce 64-, 128-, 256-, 512-, or 1024-bit checksums. It has been
-extensively tested against SMHasher written by ZhuReini Urban and all versions
-pass all the tests using commit 83fd13bc of SMHasher, except for the speed test.
-The latter fails because it measures the speed for hashing very small keys,
-which is not what the algorithm is designed for as was already explained above.
-The test harness can be found [in this
+The algorithm can produce 32-, 64-, 128-, 256-, 512-, or 1024-bit checksums. It
+has been extensively tested against SMHasher written by ZhuReini Urban and all
+versions pass all the tests using commit 83fd13bc of SMHasher, except for the
+speed test. The latter fails because it measures the speed for hashing very
+small keys, which is not what the algorithm is designed for as was already
+explained above. The test harness can be found [in this
 repository](https://github.com/rurban/smhasher). The output of the test runs is
 here:
+[32bit]()
+[64bit]()
 [128bit](https://gitlab-as.oma.be/-/project/876/uploads/24045262a738d56a503362a224cb3ab7/test_results_83fd13bc_128bit.txt),
 [256bit](https://gitlab-as.oma.be/-/project/876/uploads/e1c89df1dd45314d975e7108e495cd5a/test_results_83fd13bc_256bit.txt),
 [512bit](https://gitlab-as.oma.be/-/project/876/uploads/4c137ca1af293c22be639a68fa056add/test_results_83fd13bc_512bit.txt),
@@ -42,43 +44,47 @@ here:
 ### Command line routines
 
 After building and installing the code (see the separate file INSTALL.md for
-this) you will have five executables called vh64sum, vh128sum, vh256sum, vh512sum, and
-vh1024sum. These can produce checksums of any given file. They are designed to
-be a plug-in replacement for other well-known checksum algorithms. The actual
-checksums will be different of course, but the aim is to replicate all command
-line options. This makes it easy to adapt scripts, etc. See the man page
-included in this distribution for a more detailed description of the options. In
-the remaining description only the name vh128sum will be used for brevity, but
-all remarks apply implicitly to the other three executables as well.
+this) you will have six executables called vh32sum, vh64sum, vh128sum, vh256sum,
+vh512sum, and vh1024sum. These can produce checksums of any given file. They are
+designed to be a plug-in replacement for other well-known checksum algorithms.
+The actual checksums will be different of course, but the aim is to replicate
+all command line options. This makes it easy to adapt scripts, etc. See the man
+page included in this distribution for a more detailed description of the
+options. In the remaining description only the name vh32sum will be used for
+brevity, but all remarks apply implicitly to the other three executables as
+well.
 
 The four executables are in fact identical and are hard links to each other. The
 code determines the width of the checksum by looking at the name of the
-executable. If that name contains the string "64" it will produce a 64-bit
-executable, and similarly for 128-, 256-, 512-, and 1024-bit checksums. Other widths
-of the checksum are not supported. If it is not possible to determine the width
-of the checksum this way, the width will default to 128 bits. It is also
-possible to force the width with command line flags, e.g. the command vh128sum
-\-l256 will produce a 256-bit checksum.
+executable. If that name contains the string "32" it will produce a 32-bit
+executable, and similarly for 64-, 128-, 256-, 512-, and 1024-bit checksums.
+Other widths of the checksum are not supported. If it is not possible to
+determine the width of the checksum this way, the width will default to 32 bits.
+It is also possible to force the width with command line flags, e.g. the command
+vh32sum \-l256 will produce a 256-bit checksum.
 
-The vh128sum executable can handle multiple file names in a single invocation
-(as long as you do not exceed the maximum command-line length of the shell).
-Creating or checking checksum<s this way will be much faster than invoking
-vh128sum separately for each individual file. So this practise is strongly
+The vh32sum executable can handle multiple file names in a single invocation (as
+long as you do not exceed the maximum command-line length of the shell).
+Creating or checking checksums this way will be much faster than invoking
+vh32sum separately for each individual file. So this practise is strongly
 recommended.
 
 The code will automatically detect if supported SIMD instructions are available
 and use the highest set available. If you include the \--verbose flag, the code
 will report which SIMD instruction set has been used. You can also override this
-detection with command line options, e.g. vh128sum \--avx512 will force the code
+detection with command line options, e.g. vh32sum \--avx512 will force the code
 to use the AVX512f instruction set, even if the hardware does not support those
 instructions. You will get a crash on an illegal instruction in the latter case.
 These flags are intended for testing and debugging and should not be needed in a
 normal production environment.
 
-The command vh128sum \--help will give a complete overview of all flags that are
+The command vh32sum \--help will give a complete overview of all flags that are
 supported.
 
 The checksums of an empty file are as follows:
+
+32 bit:
+<tt>7647d9bd</tt>
 
 64 bit:
 <tt>73711a77d6031b6f</tt>
@@ -110,10 +116,10 @@ to perform a checksum on a buffer. The declaration for the call is:
 
 Here the variable <tt>buf</tt> is a pointer to the buffer that should be
 checksummed, <tt>len</tt> is the length of the buffer, <tt>seed</tt> is the seed
-for the checksum algorithm (use 0xfd4c799d to replicate the behavior of
-vh128sum, etc, but any other value is fine too), <tt>out</tt> is a pointer to
-the buffer that will be used to write the checksum into, and <tt>hw</tt> is the
-width of the checksum (allowed values are 64, 128, 256, 512, and 1024). The
+for the checksum algorithm (use 0xfd4c799d to replicate the behavior of vh32sum,
+etc, but any other value is fine too), <tt>out</tt> is a pointer to the buffer
+that will be used to write the checksum into, and <tt>hw</tt> is the width of
+the checksum (allowed values are 32, 64, 128, 256, 512, and 1024). The
 declaration is contained in the header file <tt>vectorhash.h</tt>. A very simple
 program using this library could contain:
 

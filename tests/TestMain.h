@@ -47,7 +47,7 @@ inline uint32_t ReadChunk(uint32_t pos, const string& hashstr)
 
 inline bool CheckHash(const uint32_t hash[], const string& hashstr)
 {
-	if( hashstr.size() != 16 &&
+	if( hashstr.size() != 8 && hashstr.size() != 16 &&
 		hashstr.size() != 32 && hashstr.size() != 64 &&
 		hashstr.size() != 128 && hashstr.size() != 256 )
 		return false;
