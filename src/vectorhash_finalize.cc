@@ -7,6 +7,7 @@
 //  Distributed under the "zlib license". See the accompanying LICENSE file.
 //-------------------------------------------------------------------------------
 
+#include <vector>
 #include "vectorhash_priv.h"
 #include "vectorhash_core.h"
 
@@ -69,8 +70,8 @@ void EXT(VectorHashFinalize)(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h
 	}
 
 	size_t lc_nstate = max(vh_nstate, 4_z);
-	uint32_t* lres = new uint32_t[lc_nstate];
-	uint32_t** z = new uint32_t*[lc_nstate];
+	vector<uint32_t> lres(lc_nstate);
+	vector<uint32_t*> z(lc_nstate);
 	size_t j = 0;
 	size_t nn = vh_nint*4/lc_nstate;
 	for( size_t i=0; i < lc_nstate/4; i++ )
@@ -101,8 +102,5 @@ void EXT(VectorHashFinalize)(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h
 	uint32_t* res = (uint32_t*)out;
 	for( size_t i=0; i < vh_nstate; i++ )
 		res[i] = lres[i];
-
-	delete[] z;
-	delete[] lres;
 }
 

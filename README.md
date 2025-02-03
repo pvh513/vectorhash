@@ -34,8 +34,8 @@ small keys, which is not what the algorithm is designed for as was already
 explained above. The test harness can be found [in this
 repository](https://github.com/rurban/smhasher). The output of the test runs is
 here:
-[32bit]()
-[64bit]()
+[32bit](https://gitlab-as.oma.be/-/project/876/uploads/fbe63bb0ce514750edb41e084e539756/test_results_b47ad78c_32bit.txt),
+[64bit](https://gitlab-as.oma.be/-/project/876/uploads/986b5d192f4a10c99d747946af5eab75/test_results_061162a3_64bit.txt),
 [128bit](https://gitlab-as.oma.be/-/project/876/uploads/24045262a738d56a503362a224cb3ab7/test_results_83fd13bc_128bit.txt),
 [256bit](https://gitlab-as.oma.be/-/project/876/uploads/e1c89df1dd45314d975e7108e495cd5a/test_results_83fd13bc_256bit.txt),
 [512bit](https://gitlab-as.oma.be/-/project/876/uploads/4c137ca1af293c22be639a68fa056add/test_results_83fd13bc_512bit.txt),
