@@ -13,6 +13,24 @@
 namespace {
 
 	// test empty buffer
+	TEST(TestZeroLengthBufferSSE2_32)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			VectorHash128_32(buffer, 0, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "7647d9bd") );
+		}
+	}
+
+	TEST(TestZeroLengthBufferSSE2_64)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			VectorHash128_64(buffer, 0, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "73711a77d6031b6f") );
+		}
+	}
+
 	TEST(TestZeroLengthBufferSSE2_128)
 	{
 		if( SIMDversion >= IS_SSE2 )
@@ -54,6 +72,26 @@ namespace {
 	}
 
 	// test half a blocksize
+	TEST(Test128ByteBufferSSE2_32)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test0128", 128, buffer) );
+			VectorHash128_32(buffer, 128, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "50c5164c") );
+		}
+	}
+
+	TEST(Test128ByteBufferSSE2_64)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test0128", 128, buffer) );
+			VectorHash128_64(buffer, 128, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "a9b41194bceedd04") );
+		}
+	}
+
 	TEST(Test128ByteBufferSSE2_128)
 	{
 		if( SIMDversion >= IS_SSE2 )
@@ -99,6 +137,26 @@ namespace {
 	}
 
 	// test one blocksize
+	TEST(Test256ByteBufferSSE2_32)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test0256", 256, buffer) );
+			VectorHash128_32(buffer, 256, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "0eabedeb") );
+		}
+	}
+
+	TEST(Test256ByteBufferSSE2_64)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test0256", 256, buffer) );
+			VectorHash128_64(buffer, 256, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "81534826f50039f6") );
+		}
+	}
+
 	TEST(Test256ByteBufferSSE2_128)
 	{
 		if( SIMDversion >= IS_SSE2 )
@@ -144,6 +202,26 @@ namespace {
 	}
 
 	// test 3/2 blocksizes
+	TEST(Test384ByteBufferSSE2_32)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test0384", 384, buffer) );
+			VectorHash128_32(buffer, 384, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "7273a9bf") );
+		}
+	}
+
+	TEST(Test384ByteBufferSSE2_64)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test0384", 384, buffer) );
+			VectorHash128_64(buffer, 384, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "e65f645584bcb59a") );
+		}
+	}
+
 	TEST(Test384ByteBufferSSE2_128)
 	{
 		if( SIMDversion >= IS_SSE2 )
@@ -189,6 +267,26 @@ namespace {
 	}
 
 	// test a large buffer
+	TEST(TestLargeBufferSSE2_32)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test9999", 1048576, buffer) );
+			VectorHash128_32(buffer, 1048576, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "81dddc5e") );
+		}
+	}
+
+	TEST(TestLargeBufferSSE2_64)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test9999", 1048576, buffer) );
+			VectorHash128_64(buffer, 1048576, 0xfd4c799d, cksum);
+			CHECK( CheckHash(cksum, "021fa7d3f643f834") );
+		}
+	}
+
 	TEST(TestLargeBufferSSE2_128)
 	{
 		if( SIMDversion >= IS_SSE2 )
@@ -234,6 +332,26 @@ namespace {
 	}
 
 	// test alternative seed
+	TEST(TestLargeBufferAltSeedSSE2_32)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test9999", 1048576, buffer) );
+			VectorHash128_32(buffer, 1048576, 0x6ec74615, cksum);
+			CHECK( CheckHash(cksum, "2717e727") );
+		}
+	}
+
+	TEST(TestLargeBufferAltSeedSSE2_64)
+	{
+		if( SIMDversion >= IS_SSE2 )
+		{
+			CHECK( ReadBuffer("test9999", 1048576, buffer) );
+			VectorHash128_64(buffer, 1048576, 0x6ec74615, cksum);
+			CHECK( CheckHash(cksum, "e00c65eadc62f6d4") );
+		}
+	}
+
 	TEST(TestLargeBufferAltSeedSSE2_128)
 	{
 		if( SIMDversion >= IS_SSE2 )

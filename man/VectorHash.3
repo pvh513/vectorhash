@@ -26,7 +26,7 @@ Pointer to the memory area where the checksum will be written. Needs to be at
 least \fIhw\fP bits wide.
 .TP
 \fB\fIhw\fP\fR
-Width of the checksum in bits. Allowed values are 128, 256, 512, and 1024.
+Width of the checksum in bits. Allowed values are 32, 64, 128, 256, 512, and 1024.
 .SH DESCRIPTION
 VectorHash is a very fast, non-cryptographic algorithm to produce a checksum of
 the data in a buffer. Its speed in part results from the fact that it can take
@@ -34,7 +34,7 @@ advantage of SIMD instructions from the SSE2, AVX2, or AVX512f instruction sets
 on hardware that supports these instructions, but it also supports a scalar
 version for non-Intel platforms (which still is very fast). The hardware
 capabilities will be detected automatically at runtime. The algorithm can
-produce 128-, 256-, 512-, or 1024-bit checksums. The scalar and the SIMD
+produce 32-, 64-, 128-, 256-, 512-, or 1024-bit checksums. The scalar and the SIMD
 versions of the algorithm will produce identical checksums.
 
 VectorHash has in part been inspired by the PRNG algorithm xoroshiro128++
@@ -42,7 +42,7 @@ written by David Blackman and Sebastiano Vigna (for the core of the hashing
 function) and MurmurHash3 written by Austin Appleby (for the finalization mix
 and some support routines).
 
-Use 0xfd4c799d as a \fIseed\fP to replicate the behavior of the vh128sum, etc,
+Use 0xfd4c799d as a \fIseed\fP to replicate the behavior of the vh32sum, etc,
 command line functions.
 .SH RETURN VALUE
 The checksum is written into the memory area pointed to by \fIout\fP.
@@ -80,4 +80,4 @@ Licences: BSD and MIT/X, respectively..
 This is open source software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 .SH SEE ALSO
-vh128sum(1), vh256sum(1), vh512sum(1), vh1024sum(1)
+vh32sum(1), vh64sum(1), vh128sum(1), vh256sum(1), vh512sum(1), vh1024sum(1)

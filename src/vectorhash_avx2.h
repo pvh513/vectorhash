@@ -19,11 +19,15 @@ typedef __m256i v8si;
 typedef uint32_t v8si;
 #endif
 
+void VectorHashBody256_32(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[]);
+void VectorHashBody256_64(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[]);
 void VectorHashBody256_128(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[]);
 void VectorHashBody256_256(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[]);
 void VectorHashBody256_512(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[]);
 void VectorHashBody256_1024(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[]);
 
+void VectorHash256_32(const void* buf, size_t len, uint32_t seed, void* out);
+void VectorHash256_64(const void* buf, size_t len, uint32_t seed, void* out);
 void VectorHash256_128(const void* buf, size_t len, uint32_t seed, void* out);
 void VectorHash256_256(const void* buf, size_t len, uint32_t seed, void* out);
 void VectorHash256_512(const void* buf, size_t len, uint32_t seed, void* out);

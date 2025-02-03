@@ -10,6 +10,8 @@
 #ifndef VECTORHASH_FINALIZE_H
 #define VECTORHASH_FINALIZE_H
 
+void VectorHashFinalize_32(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
+void VectorHashFinalize_64(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
 void VectorHashFinalize_128(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
 void VectorHashFinalize_256(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);
 void VectorHashFinalize_512(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out);

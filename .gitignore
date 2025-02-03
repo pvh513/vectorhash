@@ -6,7 +6,9 @@ libvhsum.a
 tests/TestMain
 unittest-cpp/TestUnitTest++
 unittest-cpp/libUnitTest++.a
-vh1024sum
+vh32sum
+vh64sum
 vh128sum
 vh256sum
 vh512sum
+vh1024sum

@@ -7,8 +7,14 @@
 //  Distributed under the "zlib license". See the accompanying LICENSE file.
 //-------------------------------------------------------------------------------
 
+#include <vector>
 #include "vectorhash_priv.h"
 #include "vectorhash_core.h"
+
+inline size_t operator "" _z (unsigned long long n)
+{
+	return n;
+}
 
 //-----------------------------------------------------------------------------
 // Finalization mix - force all bits of a hash block to avalanche
@@ -63,26 +69,38 @@ void EXT(VectorHashFinalize)(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h
 		h4[j] = vh_add(h4[j], h3[0]);
 	}
 
-	uint32_t* res = (uint32_t*)out;
-	uint32_t* z[vh_nstate];
+	size_t lc_nstate = max(vh_nstate, 4_z);
+	vector<uint32_t> lres(lc_nstate);
+	vector<uint32_t*> z(lc_nstate);
 	size_t j = 0;
-	size_t nn = vh_nint*4/vh_nstate;
-	for( size_t i=0; i < vh_nstate/4; i++ )
+	size_t nn = vh_nint*4/lc_nstate;
+	for( size_t i=0; i < lc_nstate/4; i++ )
 		z[j++] = &h1[i*nn];
-	for( size_t i=0; i < vh_nstate/4; i++ )
+	for( size_t i=0; i < lc_nstate/4; i++ )
 		z[j++] = &h2[i*nn];
-	for( size_t i=0; i < vh_nstate/4; i++ )
+	for( size_t i=0; i < lc_nstate/4; i++ )
 		z[j++] = &h3[i*nn];
-	for( size_t i=0; i < vh_nstate/4; i++ )
+	for( size_t i=0; i < lc_nstate/4; i++ )
 		z[j++] = &h4[i*nn];
 
 	// fold the result to the desired hash width
-	size_t ns2 = vh_nstate/2;
-	for( uint32_t i=0; i < vh_nstate; i++ )
+	size_t ns2 = lc_nstate/2;
+	for( size_t i=0; i < lc_nstate; i++ )
 	{
-		res[i] = fmix32(z[i][0] ^ z[(i+ns2)%vh_nstate][nn-1]);
+		lres[i] = fmix32(z[i][0] ^ z[(i+ns2)%lc_nstate][nn-1]);
 		for( size_t j=1; j < nn; j++ )
-			res[i] ^= fmix32(z[(j+i)%vh_nstate][j] ^ z[(j+i+ns2)%vh_nstate][nn-1-j]);
+			lres[i] ^= fmix32(z[(j+i)%lc_nstate][j] ^ z[(j+i+ns2)%lc_nstate][nn-1-j]);
 	}
+
+	while( lc_nstate > vh_nstate )
+	{
+		for( size_t i=0; i < lc_nstate/2; ++i )
+			lres[i] = fmix32(lres[i], lres[lc_nstate-1-i]);
+		lc_nstate /= 2;
+	}
+
+	uint32_t* res = (uint32_t*)out;
+	for( size_t i=0; i < vh_nstate; i++ )
+		res[i] = lres[i];
 }
 

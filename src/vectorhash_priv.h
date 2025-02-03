@@ -38,8 +38,14 @@ static const string vh_version( "0.1" );
 // tunable parameters
 
 // width of the hash (in bits)
-// this value MUST be a power of 2 with a minimum of 128
-#if defined(VH128)
+// this value MUST be a power of 2 with a minimum of 32
+#if defined(VH32)
+static const size_t vh_hash_width = 32;
+#define EXT(X) X##_32
+#elif defined(VH64)
+static const size_t vh_hash_width = 64;
+#define EXT(X) X##_64
+#elif defined(VH128)
 static const size_t vh_hash_width = 128;
 #define EXT(X) X##_128
 #elif defined(VH256)
@@ -52,8 +58,8 @@ static const size_t vh_hash_width = 512;
 static const size_t vh_hash_width = 1024;
 #define EXT(X) X##_1024
 #else
-static const size_t vh_hash_width = 128;
-#define EXT(X) X##_128
+static const size_t vh_hash_width = 32;
+#define EXT(X) X##_32
 #endif
 
 // width of largest hardware register that is supported (in bits)
