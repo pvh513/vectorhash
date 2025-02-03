@@ -83,10 +83,10 @@ supported.
 
 The checksums of an empty file are as follows:
 
-32 bit:
+32 bit:  
 <tt>7647d9bd</tt>
 
-64 bit:
+64 bit:  
 <tt>73711a77d6031b6f</tt>
 
 128 bit:   
