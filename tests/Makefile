@@ -4,7 +4,12 @@ LDFLAGS = -lcpuid -L../cpuid -lUnitTest++ -L../unittest-cpp -lvhsum -L..
 
 .PHONY: all clean
 
-all: TestMain
+all: TestMain run_tests.sh
+	@echo "=============================="
+	@echo " Starting VectorHash tests... "
+	@echo "=============================="
+	./TestMain
+	./run_tests.sh
 
 clean:
 	rm -f *.o
@@ -15,8 +20,3 @@ clean:
 
 TestMain: TestMain.o TestScalar.o TestSSE2.o TestAVX2.o TestAVX512f.o
 	$(CXX) $^ $(LDFLAGS) -o TestMain
-	@echo "=============================="
-	@echo " Starting VectorHash tests... "
-	@echo "=============================="
-	./TestMain
-	./run_tests.sh

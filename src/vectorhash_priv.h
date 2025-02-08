@@ -17,7 +17,7 @@
 
 using namespace std;
 
-static const string vh_version( "0.1" );
+static const string vh_version( "0.2" );
 
 #undef VH_INTEL
 #ifdef MSVC
@@ -77,7 +77,7 @@ static const size_t vh_nstate = vh_hash_width/32;
 static const size_t vh_nint = vh_virtreg_width/32;
 
 // the file is read with this blocksize (in bytes)
-static size_t blocksize = 4*vh_nint*sizeof(uint32_t);
+static const size_t blocksize = 4*vh_nint*sizeof(uint32_t);
 
 // what instruction sets can the CPU handle?
 typedef enum { IS_INVALID=-1, IS_SCALAR=0, IS_SSE2, IS_AVX2, IS_AVX512 } is_type;
@@ -107,13 +107,13 @@ inline uint32_t rotl32 ( uint32_t x, int r )
 
 #endif
 
-inline void pad_buffer(const uint8_t* src, uint8_t* buf, size_t len)
+inline void pad_buffer(const uint8_t* src, uint8_t* buf, size_t len, size_t bufsz)
 {
 	for( size_t i=0; i < len; i++ )
 		buf[i] = src[i];
 	uint32_t c = 0;
 	const uint32_t mask = 0xff;
-	while( len < blocksize )
+	while( len < bufsz )
 		buf[len++] = uint8_t(++c & mask);
 }
 

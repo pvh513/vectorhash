@@ -95,7 +95,7 @@ void EXT(VectorHash256)(const void* buffer, size_t len, uint32_t seed, void* out
 
 	// pad the remaining characters and process...
 	v8si buf[blocksize/sizeof(v8si)];
-	pad_buffer( (const uint8_t*)data, (uint8_t*)buf, len-nblocks*blocksize );
+	pad_buffer( (const uint8_t*)data, (uint8_t*)buf, len-nblocks*blocksize, blocksize );
 	EXT(VectorHashBody256)(buf, h1, h2, h3, h4);
 
 	uint32_t* z1 = (uint32_t*)h1;

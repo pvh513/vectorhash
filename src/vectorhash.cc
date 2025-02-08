@@ -219,13 +219,14 @@ static string VHstdin(const vh_params& vhp)
 		return string();
 	vector<uint32_t> state(vhp.vh_nstate);
 	size_t len = 0, bsize;
-	while( true )
+	bool lgContinue = true;
+	while( lgContinue )
 	{
 		bsize = fread( map, 1, vhp.blocksize, stdin );
-		if( bsize == 0 )
-			break;
-		if( bsize < vhp.blocksize )
-			pad_buffer( (const uint8_t*)map, (uint8_t*)map, bsize );
+		if( bsize < vhp.blocksize ) {
+			pad_buffer( (const uint8_t*)map, (uint8_t*)map, bsize, vhp.blocksize );
+			lgContinue = false;
+		}
 		if( vhp.SIMDversion == IS_AVX512 )
 			VectorHashBody512((const v16si*)map, (v16si*)h1, (v16si*)h2, (v16si*)h3, (v16si*)h4, vhp.vh_hash_width);
 		else if( vhp.SIMDversion == IS_AVX2 )

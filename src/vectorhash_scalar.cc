@@ -51,7 +51,7 @@ void EXT(VectorHash32)(const void* buffer, size_t len, uint32_t seed, void* out)
 
 	// pad the remaining characters and process...
 	uint32_t buf[blocksize/sizeof(uint32_t)];
-	pad_buffer( (const uint8_t*)data, (uint8_t*)buf, len-nblocks*blocksize );
+	pad_buffer( (const uint8_t*)data, (uint8_t*)buf, len-nblocks*blocksize, blocksize );
 	EXT(VectorHashBody32)(buf, h1, h2, h3, h4);
 
 	EXT(VectorHashFinalize)(len, h1, h2, h3, h4, out);
