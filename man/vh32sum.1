@@ -121,7 +121,12 @@ warn about improperly formatted checksum lines.
 use a different output format: end each line with the NUL character instead
 of newline, and disable file name escaping.
 .SH "EXIT STATUS"
-TODO. Describe the exit status values here...
+The executable returns 0 when no errors occurred, and 1 otherwise. The following
+problems will be considered errors: files that are missing or cannot be read,
+conflicting command line parameters, or an internal error. When checking files,
+a checksum mismatch is also an error. Improperly formatted checksum lines are
+not considered an error unless the \fB\-\-strict\fR flag is used, or if the
+input file contains no properly formatted checksum lines at all.
 .SH NOTES
 There is no difference between binary mode and text mode on GNU systems.
 .SH CAVEATS

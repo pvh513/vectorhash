@@ -81,7 +81,12 @@ normal production environment.
 The command vh32sum \--help will give a complete overview of all flags that are
 supported.
 
-The checksums of an empty file are as follows:
+The checksums of an empty file are as follows. These can be reproduced with the
+command
+
+	echo -n | vh32sum
+
+and similarly for other checksum widths.
 
 32 bit:  
 <tt>7647d9bd</tt>
@@ -168,7 +173,7 @@ for a detailed discussion of how to obtain correctly aligned memory.
 
 VectorHash is distributed with a [zlib open-source software
 license](https://opensource.org/licenses/Zlib). You are free to change and
-redistribute it. There is NO WARRANTY, to the extent permitted by law.
+redistribute the software. There is NO WARRANTY, to the extent permitted by law.
 
 ### The cpuid library
 

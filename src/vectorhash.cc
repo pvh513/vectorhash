@@ -85,6 +85,10 @@ struct vh_params {
 		vh_nint = vh_virtreg_width/32;
 		// the file is read with this blocksize (in bytes)
 		blocksize = 4*vh_nint*sizeof(uint32_t);
+		// update the name as well...
+		ostringstream oss;
+		oss << "VH" << vh_hash_width;
+		name = oss.str();
 		return true;
 	}
 	vh_params() : lgBSDstyle(false), lgCheckMode(false), lgIgnoreMissing(false), lgBinarySet(false),
@@ -534,8 +538,10 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			cout << vhp.cmd << ": WARNING: 1 computed checksum did NOT match\n";
 		else if( failed > 1 )
 			cout << vhp.cmd << ": WARNING: " << failed << " computed checksums did NOT match\n";
-		if( correct == 0 )
+		if( correct == 0 ) {
 			cout << vhp.cmd << ": " << arg << ": no properly formatted " << vhp.name << " checksum lines found\n";
+			vhp.returncode = 1;
+		}
 		else if( formaterr == 1 )
 			cout << vhp.cmd << ": WARNING: 1 line is improperly formatted\n";
 		else if( formaterr > 1 )
@@ -625,6 +631,12 @@ static void VerifyOptions( vh_params& vhp )
 	if( vhp.lgCheckMode && vhp.lgZero )
 	{
 		cout << vhp.cmd << ": the --zero option is not supported when verifying checksums\n";
+		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		exit(1);
+	}
+	if( vhp.lgStatusOnly && vhp.lgVerbose )
+	{
+		cout << vhp.cmd << ": the --verbose option conflicts with --status\n";
 		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
 		exit(1);
 	}
