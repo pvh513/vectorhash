@@ -372,6 +372,9 @@ static void PrintHelp(const vh_params& vhp)
 	cout << "  -v, --version         print version information and exit\n";
 	cout << "      --verbose         print additional information (mainly for debugging)\n";
 	cout << endl;
+	cout << "Long versions of the OPTIONs can be abbreviated, provided the abbreviated form is\n";
+	cout << "unambiguous.\n";
+	cout << endl;
 	cout << "The sums are computed using a vectorized algorithm that supports the AVX512f, AVX2,\n";
 	cout << "and SSE2 instructions sets. A scalar version is also supplied for other hardware.\n";
 	cout << "The resulting sum is identical for each of these instruction sets.\n";
@@ -712,15 +715,18 @@ size_t findUniqueLen(trieNode* root, const string& token)
 	return token.length();
 }
 
-string MatchLongParm(const string lopt[], const size_t loml[], size_t nlopt, const string& token)
+bool MatchLongParm(const string lopt[], const size_t loml[], size_t nlopt, string& token)
 {
 	for( size_t i=0; i < nlopt; ++i )
 	{
 		size_t len = max(loml[i], token.size());
 		if( lopt[i].substr(0, len) == token )
-			return lopt[i];
+		{
+			token = lopt[i];
+			return true;
+		}
 	}
-	return token;
+	return false;
 }
 
 string GetParameter(char** argv, int& i, int j, uint32_t& res)
@@ -756,7 +762,6 @@ int main(int argc, char** argv)
 	ostringstream oss;
 	oss << "VH" << vhp.vh_hash_width;
 	vhp.name = oss.str();
-	bool lgOptions = true;
 
 	// the alphabetical list of recognized long options 
 	static const string lopt[] = {
@@ -775,9 +780,12 @@ int main(int argc, char** argv)
 		loml[i] = findUniqueLen(root, lopt[i]);
 	delete root;
 
+	bool lgOptions = true;
 	for( int i=1; i < argc; ++i )
 	{
 		string arg = argv[i];
+		if( arg.length() == 0 )
+			continue;
 		if( lgOptions && ( arg[0] != '-' || arg.length() == 1 ) )
 		{
 			VerifyOptions( vhp );
@@ -787,7 +795,14 @@ int main(int argc, char** argv)
 		{
 			// expand abbreviated long option if necessary
 			if( arg.length() > 2 && arg[0] == '-' && arg[1] == '-' )
-				arg = MatchLongParm(lopt, loml, nlopt, arg);
+			{
+				if( !MatchLongParm(lopt, loml, nlopt, arg) )
+				{
+					cout << vhp.cmd << ": unrecognized option \'" << arg << "\'\n";
+					cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+					return 1;
+				}
+			}
 			if( isalpha(arg[1]) )
 			{
 				for( size_t j=1; j < arg.length(); j++ )
