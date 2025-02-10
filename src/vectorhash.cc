@@ -940,10 +940,13 @@ int main(int argc, char** argv)
 				if( io == 0 )
 				{
 					cout << vhp.cmd << ": " << arg << ": No such file or directory\n";
-					return 1;
+					vhp.returncode = 1;
 				}
-				ProcessFile( vhp, arg, io );
-				fclose( io );
+				else
+				{
+					ProcessFile( vhp, arg, io );
+					fclose( io );
+				}
 			}
 		}
 	}
