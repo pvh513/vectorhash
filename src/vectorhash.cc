@@ -154,6 +154,19 @@ inline void posix_memalign_free(void *p)
 }
 #endif
 
+inline string escfn(const string& s)
+{
+	// TODO this routine is too simplistic and needs more work...
+	bool lgEsc = ( s.length() == 0 );
+	for( auto c : s )
+		if( isspace(c) || c == '\\' )
+			lgEsc = true;
+	if( lgEsc )
+		return "\'" + s + "\'";
+	else
+		return s;
+}
+
 static string VHstream(const vh_params& vhp, FILE* io)
 {
 	if( fseek( io, 0, SEEK_END ) != 0 )
@@ -452,7 +465,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			{
 				if( vhp.lgWarnSyntax )
 				{
-					cout << vhp.cmd << ": " << arg << ": " << lineno;
+					cout << vhp.cmd << ": " << escfn(arg) << ": " << lineno;
 					cout << ": improperly formatted " << vhp.name << " checksum line\n";
 				}
 				++formaterr;
@@ -470,7 +483,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			{
 				if( vhp.lgWarnSyntax )
 				{
-					cout << vhp.cmd << ": " << arg << ": " << lineno;
+					cout << vhp.cmd << ": " << escfn(arg) << ": " << lineno;
 					cout << ": improperly formatted " << vhp.name << " checksum line\n";
 				}
 				++formaterr;
@@ -482,7 +495,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 		{
 			if( vhp.lgWarnSyntax )
 			{
-				cout << vhp.cmd << ": " << arg << ": " << lineno;
+				cout << vhp.cmd << ": " << escfn(arg) << ": " << lineno;
 				cout << ": improperly formatted " << vhp.name << " checksum line\n";
 			}
 			++formaterr;
@@ -502,7 +515,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			if( !vhp.lgIgnoreMissing )
 			{
 				if( !vhp.lgStatusOnly )
-					cout << vhp.cmd << ": " << esc << ": No such file or directory\n";
+					cout << vhp.cmd << ": " << escfn(path) << ": No such file or directory\n";
 				vhp.returncode = 1;
 			}
 		}
@@ -542,7 +555,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 		else if( failed > 1 )
 			cout << vhp.cmd << ": WARNING: " << failed << " computed checksums did NOT match\n";
 		if( correct == 0 ) {
-			cout << vhp.cmd << ": " << arg << ": no properly formatted " << vhp.name << " checksum lines found\n";
+			cout << vhp.cmd << ": " << escfn(arg) << ": no properly formatted " << vhp.name << " checksum lines found\n";
 			vhp.returncode = 1;
 		}
 		else if( formaterr == 1 )
@@ -781,17 +794,15 @@ int main(int argc, char** argv)
 	delete root;
 
 	bool lgOptions = true;
+	vector<string> fnam;
 	for( int i=1; i < argc; ++i )
 	{
 		string arg = argv[i];
-		if( arg.length() == 0 )
-			continue;
-		if( lgOptions && ( arg[0] != '-' || arg.length() == 1 ) )
+		if( !lgOptions || arg.length() <= 1 || arg[0] != '-' )
 		{
-			VerifyOptions( vhp );
-			lgOptions = false;
+			fnam.emplace_back(arg);
 		}
-		if( lgOptions )
+		else
 		{
 			// expand abbreviated long option if necessary
 			if( arg.length() > 2 && arg[0] == '-' && arg[1] == '-' )
@@ -861,10 +872,7 @@ int main(int argc, char** argv)
 				}
 			}
 			else if( arg == "--" )
-			{
-				VerifyOptions( vhp );
 				lgOptions = false;
-			}
 			else if( arg == "--avx2" )
 				vhp.SIMDversion = IS_AVX2;
 			else if( arg == "--avx512" )
@@ -928,33 +936,39 @@ int main(int argc, char** argv)
 				return 1;
 			}
 		}
-		else
+	}
+
+	VerifyOptions( vhp );
+
+	if( fnam.size() == 0 )
+	{
+		// no file name was given -> process stdin
+		ProcessFile( vhp, "-", 0 );
+	}
+	else
+	{
+		for( const auto& file : fnam )
 		{
-			if( arg == "-" )
+			if( file == "-" )
 			{
-				ProcessFile( vhp, arg, 0 );
+				ProcessFile( vhp, file, 0 );
 			}
 			else
 			{
-				FILE* io = fopen( arg.c_str(), vhp.option().c_str() );
+				FILE* io = fopen( file.c_str(), vhp.option().c_str() );
 				if( io == 0 )
 				{
-					cout << vhp.cmd << ": " << arg << ": No such file or directory\n";
+					cout << vhp.cmd << ": " << escfn(file) << ": No such file or directory\n";
 					vhp.returncode = 1;
 				}
 				else
 				{
-					ProcessFile( vhp, arg, io );
+					ProcessFile( vhp, file, io );
 					fclose( io );
 				}
 			}
 		}
 	}
-	if( lgOptions )
-	{
-		VerifyOptions( vhp );
-		// no file name was given -> process stdin
-		ProcessFile( vhp, "-", 0 );
-	}
+
 	return vhp.returncode;
 }

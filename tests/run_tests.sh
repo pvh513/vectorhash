@@ -143,8 +143,10 @@ check_cmd "../vh512sum --verb test0128"
 check_cmd "../vh512sum --verbose --scalar test0128"
 
 # make sure the code continues after a missing file
-check_error_msg "../vh64sum tost0000 test0000" "tost0000: No such file or directory"
-check_error_msg "../vh64sum tost0000 test0000" "73711a77d6031b6f  test0000"
+check_error_msg "../vh64sum tost0000 -- --arg '' test0000" ": tost0000: No such file or directory"
+check_error_msg "../vh64sum tost0000 -- --arg '' test0000" ": --arg: No such file or directory"
+check_error_msg "../vh64sum tost0000 -- --arg '' test0000" ": '': No such file or directory"
+check_error_msg "../vh64sum tost0000 -- --arg '' test0000" "73711a77d6031b6f  test0000"
 
 check_error_msg "../vh64sum -G" "invalid option -- 'G'"
 check_error_msg "../vh64sum --ver" "unrecognized option '--ver'"
