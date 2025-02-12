@@ -4,7 +4,8 @@ tempnam='vhtest.tmp.R6sq9'
 
 test_cks_file () {
 	rm -f $tempnam
-	$1 > $tempnam
+	eval "arr=($1)"
+	"${arr[@]}" > $tempnam 2>&1
 	local retval1=$?
 	if [ $retval1 -ne 0 ]; then
 	   echo "command ==$1== failed"
@@ -41,7 +42,8 @@ check_cmd () {
 
 check_error_msg () {
 	rm -f $tempnam
-	$1 > $tempnam
+	eval "arr=($1)"
+	"${arr[@]}" > $tempnam 2>&1
 	local retval1=$?
 	if [ $retval1 -ne 1 ]; then
 	   echo "command ==$1== did not fail"
@@ -58,7 +60,8 @@ check_error_msg () {
 
 check_no_error_msg () {
 	rm -f $tempnam
-	$1 > $tempnam
+	eval "arr=($1)"
+	"${arr[@]}" > $tempnam 2>&1
 	grep "$2" $tempnam > /dev/null
 	local retval2=$?
 	if [ $retval2 -eq 0 ]; then
@@ -70,7 +73,8 @@ check_no_error_msg () {
 
 check_no_output () {
 	rm -f $tempnam
-	$1 > $tempnam
+	eval "arr=($1)"
+	"${arr[@]}" > $tempnam 2>&1
 	if [ -s $tempnam ]; then
 		echo "output was found in $tempnam"
 		exit 1;
