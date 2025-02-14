@@ -1,3 +1,5 @@
+## VectorHash Changelog
+
 VectorHash is a very fast, non-cryptographic checksum algorithm. It has in part
 been inspired by the PRNG algorithm xoroshiro128++ written by David Blackman and
 Sebastiano Vigna (for the core of the hashing function) and MurmurHash3 written
@@ -8,10 +10,12 @@ also has a scalar version for non-Intel platforms. The resulting checksum is
 identical for each of these instruction sets. The supported instruction sets
 will be detected automatically during runtime.
 
-The initial development will be aimed at finalizing the development of the code
+### Release philosophy
+
+The initial development will be aimed at finalizing the main functionality of the code
 and doing more advanced tests in order to flush out the remaining bugs. During
-this time beta releases will be created with version numbers v0.x. The aim is
-(amongst other things) to run a clean test suite for all checksum widths against
+this time beta releases will be created with version numbers v0.x. The aim is,
+amongst other things, to run a clean test suite for all checksum widths against
 SMHasher written by ZhuReini Urban (except for the small key speed test). Since
 testing against SMHasher is not fully complete, it may happen that checksums
 change during the beta tesing phase. Once beta testing is complete, version
@@ -19,12 +23,19 @@ number v1.0 will be created as the first official release. From that point
 onwards backward compatibility will be guaranteed and the checksums will not
 change (at least for versions v1.x).
 
-Release v0.1 was created on 3 Feb 2025.
-=======================================
+### Version History
+
+#### Release v0.1 was created on 3 Feb 2025.
 
 - Fix bugs that resulted in incorrect checksums when reading from stdin.
   Checksums created when reading from a named file remain unchanged.
+
 - Add numerous tests of the command-line executable.
 
-Release v0.2 was created on 9 Feb 2025.
-=======================================
+#### Release v0.2 was created on 9 Feb 2025.
+
+- Fix numerous minor bugs to improve compatibility with standard Linux
+  checksum algorithms.
+
+#### Release v0.3 was created on 14 Feb 2025.
+
