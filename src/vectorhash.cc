@@ -154,6 +154,91 @@ inline void posix_memalign_free(void *p)
 }
 #endif
 
+struct pstr
+{
+	string s;
+	unsigned char c;
+	pstr() : c('\0') {}
+	pstr(bool lgEsc) { c = lgEsc ? '\'' : '\0'; } 
+};
+
+inline string escfn(const string& s)
+{
+	// TODO this routine is too simplistic and needs more work... It ignores locale and trigraphs.
+	if( s.size() == 0 )
+		return "''";
+
+	bool lgEsc = ( s[0] == '~' || s[0] == '#' || s.find_first_of("!\"$&()*;<=>?[\\^`|: ") != string::npos );
+
+	pstr es1(lgEsc);
+	vector<pstr> es;
+	for( auto c : s )
+	{
+		if( iscntrl(c) )
+		{
+			es1.c = '\'';
+			es.emplace_back(es1);
+			es1 = pstr();
+			es1.s += "$'\\";
+			if( c == '\a' )
+				es1.s += "a'";
+			else if( c == '\b' )
+				es1.s += "b'";
+			else if( c == '\f' )
+				es1.s += "f'";
+			else if( c == '\n' )
+				es1.s += "n'";
+			else if( c == '\r' )
+				es1.s += "r'";
+			else if( c == '\t' )
+				es1.s += "t'";
+			else if( c == '\v' )
+				es1.s += "v'";
+			else
+			{
+				ostringstream oss;
+				oss << setw(3) << setfill('0') << oct << ((unsigned int)c&0xff) << "'";
+				es1.s += oss.str();
+			}
+			es.emplace_back(es1);
+			es1 = pstr(true);
+		}
+		else
+		{
+			if( c == '\'' )
+			{
+				if( es1.c == '\'' )
+				{
+					es.emplace_back(es1);
+					es1 = pstr();
+					es1.s = "\\'";
+					es.emplace_back(es1);
+					es1 = pstr(true);
+				}
+				else
+				{
+					es1.c = '"';
+					es1.s.append(1, c);
+				}
+			}
+			else
+				es1.s.append(1, c);
+		}
+	}
+	if( es1.s.size() > 0 )
+		es.emplace_back(es1);
+	ostringstream oss;
+	for( const auto& p : es )
+	{
+		if( p.c != '\0' )
+			oss << p.c;
+		oss << p.s;
+		if( p.c != '\0' )
+			oss << p.c;
+	}
+	return oss.str();
+}
+
 static string VHstream(const vh_params& vhp, FILE* io)
 {
 	if( fseek( io, 0, SEEK_END ) != 0 )
@@ -241,7 +326,7 @@ static string VHstdin(const vh_params& vhp)
 			VectorHashBody32((const uint32_t*)map, (uint32_t*)h1, (uint32_t*)h2, (uint32_t*)h3, (uint32_t*)h4,
 							 vhp.vh_hash_width);
 		else {
-			cout << "Internal error: impossible value for SIMD version: " << vhp.SIMDversion << "." << endl;
+			cerr << "Internal error: impossible value for SIMD version: " << vhp.SIMDversion << "." << endl;
 			exit(1);
 		}
 		len += bsize;
@@ -261,7 +346,7 @@ static string VHstdin(const vh_params& vhp)
 	else if( vhp.vh_hash_width == 1024 )
 		VectorHashFinalize_1024(len, z1, z2, z3, z4, state.data());
 	else {
-		cout << "Internal error: impossible value for hash width: " << vhp.vh_hash_width << "." << endl;
+		cerr << "Internal error: impossible value for hash width: " << vhp.vh_hash_width << "." << endl;
 		exit(1);
 	}
 
@@ -421,15 +506,15 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 	size_t correct = 0;
 	size_t lineno= 0 ;
 	// do not allow upper case hexadecimal digits as unmodified output should always be lower case
-	const regex bsd_format( "^(\\\\)?VH([[:d:]]+) \\((.+)\\) = ([[:d:]a-f]+)$" );
-	const regex std_format( "^(\\\\)?([[:d:]a-f]+) ([ *])(.+)$" );
+	const regex bsd_format( "^(\\\\)?VH([[:d:]]+) \\(([^\\n]+)\\) = ([[:d:]a-f]+)$" );
+	const regex std_format( "^(\\\\)?([[:d:]a-f]+) ([ *])([^\\n]+)$" );
 	while( read_whole_line(line, io) )
 	{
 		while( true )
 		{
 			// erase trailing newline
 			char c = line.back();
-			if( c != '\n' && c != '\r' )
+			if( c != '\n' )
 				break;
 			line.pop_back();
 		}
@@ -452,8 +537,8 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			{
 				if( vhp.lgWarnSyntax )
 				{
-					cout << vhp.cmd << ": " << arg << ": " << lineno;
-					cout << ": improperly formatted " << vhp.name << " checksum line\n";
+					cerr << vhp.cmd << ": " << escfn(arg) << ": " << lineno;
+					cerr << ": improperly formatted " << vhp.name << " checksum line\n";
 				}
 				++formaterr;
 				continue;
@@ -470,8 +555,8 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			{
 				if( vhp.lgWarnSyntax )
 				{
-					cout << vhp.cmd << ": " << arg << ": " << lineno;
-					cout << ": improperly formatted " << vhp.name << " checksum line\n";
+					cerr << vhp.cmd << ": " << escfn(arg) << ": " << lineno;
+					cerr << ": improperly formatted " << vhp.name << " checksum line\n";
 				}
 				++formaterr;
 				continue;
@@ -482,8 +567,8 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 		{
 			if( vhp.lgWarnSyntax )
 			{
-				cout << vhp.cmd << ": " << arg << ": " << lineno;
-				cout << ": improperly formatted " << vhp.name << " checksum line\n";
+				cerr << vhp.cmd << ": " << escfn(arg) << ": " << lineno;
+				cerr << ": improperly formatted " << vhp.name << " checksum line\n";
 			}
 			++formaterr;
 			continue;
@@ -502,7 +587,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			if( !vhp.lgIgnoreMissing )
 			{
 				if( !vhp.lgStatusOnly )
-					cout << vhp.cmd << ": " << esc << ": No such file or directory\n";
+					cerr << vhp.cmd << ": " << escfn(path) << ": No such file or directory\n";
 				vhp.returncode = 1;
 			}
 		}
@@ -534,21 +619,21 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 	if( !vhp.lgStatusOnly )
 	{
 		if( ioerror == 1 )
-			cout << vhp.cmd << ": WARNING: 1 listed file could not be read\n";
+			cerr << vhp.cmd << ": WARNING: 1 listed file could not be read\n";
 		else if( ioerror > 1 )
-			cout << vhp.cmd << ": WARNING: " << ioerror << " listed files could not be read\n";
+			cerr << vhp.cmd << ": WARNING: " << ioerror << " listed files could not be read\n";
 		if( failed == 1 )
-			cout << vhp.cmd << ": WARNING: 1 computed checksum did NOT match\n";
+			cerr << vhp.cmd << ": WARNING: 1 computed checksum did NOT match\n";
 		else if( failed > 1 )
-			cout << vhp.cmd << ": WARNING: " << failed << " computed checksums did NOT match\n";
+			cerr << vhp.cmd << ": WARNING: " << failed << " computed checksums did NOT match\n";
 		if( correct == 0 ) {
-			cout << vhp.cmd << ": " << arg << ": no properly formatted " << vhp.name << " checksum lines found\n";
+			cerr << vhp.cmd << ": " << escfn(arg) << ": no properly formatted " << vhp.name << " checksum lines found\n";
 			vhp.returncode = 1;
 		}
 		else if( formaterr == 1 )
-			cout << vhp.cmd << ": WARNING: 1 line is improperly formatted\n";
+			cerr << vhp.cmd << ": WARNING: 1 line is improperly formatted\n";
 		else if( formaterr > 1 )
-			cout << vhp.cmd << ": WARNING: " << formaterr << " lines are improperly formatted\n";
+			cerr << vhp.cmd << ": WARNING: " << formaterr << " lines are improperly formatted\n";
 	}
 	if( vhp.lgStrict && formaterr > 0 )
 		vhp.returncode = 1;
@@ -585,62 +670,62 @@ static void VerifyOptions( vh_params& vhp )
 
 	if( vhp.lgIgnoreMissing && !vhp.lgCheckMode )
 	{
-		cout << vhp.cmd << ": the --ignore-missing option is meaningful only when verifying checksums\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --ignore-missing option is meaningful only when verifying checksums\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgStatusOnly && !vhp.lgCheckMode )
 	{
-		cout << vhp.cmd << ": the --status option is meaningful only when verifying checksums\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --status option is meaningful only when verifying checksums\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgQuiet && !vhp.lgCheckMode )
 	{
-		cout << vhp.cmd << ": the --quiet option is meaningful only when verifying checksums\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --quiet option is meaningful only when verifying checksums\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgWarnSyntax && !vhp.lgCheckMode )
 	{
-		cout << vhp.cmd << ": the --warn option is meaningful only when verifying checksums\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --warn option is meaningful only when verifying checksums\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgStrict && !vhp.lgCheckMode )
 	{
-		cout << vhp.cmd << ": the --strict option is meaningful only when verifying checksums\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --strict option is meaningful only when verifying checksums\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgBSDstyle && vhp.lgCheckMode )
 	{
-		cout << vhp.cmd << ": the --tag option is meaningless when verifying checksums\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --tag option is meaningless when verifying checksums\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgBSDstyle && vhp.lgTextSet )
 	{
-		cout << vhp.cmd << ": --tag does not support --text mode\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": --tag does not support --text mode\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgCheckMode && ( vhp.lgBinarySet || vhp.lgTextSet ) )
 	{
-		cout << vhp.cmd << ": the --binary and --text options are meaningless when verifying checksums\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --binary and --text options are meaningless when verifying checksums\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgCheckMode && vhp.lgZero )
 	{
-		cout << vhp.cmd << ": the --zero option is not supported when verifying checksums\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --zero option is not supported when verifying checksums\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 	if( vhp.lgStatusOnly && vhp.lgVerbose )
 	{
-		cout << vhp.cmd << ": the --verbose option conflicts with --status\n";
-		cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+		cerr << vhp.cmd << ": the --verbose option conflicts with --status\n";
+		cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 		exit(1);
 	}
 }
@@ -680,7 +765,7 @@ void insertToken(trieNode* root, const string& token)
 		// allow only pure ASCII
 		if( index >= TRIESZ )
 		{
-			cout << "Internal error: invalid character in token\n";
+			cerr << "Internal error: invalid character in token\n";
 			exit(1);
 		}
  
@@ -704,7 +789,7 @@ size_t findUniqueLen(trieNode* root, const string& token)
 		// allow only pure ASCII
 		if( index >= TRIESZ )
 		{
-			cout << "Internal error: invalid character in token\n";
+			cerr << "Internal error: invalid character in token\n";
 			exit(1);
 		}
 		pCrawl = pCrawl->child[index];
@@ -781,25 +866,23 @@ int main(int argc, char** argv)
 	delete root;
 
 	bool lgOptions = true;
+	vector<string> fnam;
 	for( int i=1; i < argc; ++i )
 	{
 		string arg = argv[i];
-		if( arg.length() == 0 )
-			continue;
-		if( lgOptions && ( arg[0] != '-' || arg.length() == 1 ) )
+		if( !lgOptions || arg.length() <= 1 || arg[0] != '-' )
 		{
-			VerifyOptions( vhp );
-			lgOptions = false;
+			fnam.emplace_back(arg);
 		}
-		if( lgOptions )
+		else
 		{
 			// expand abbreviated long option if necessary
 			if( arg.length() > 2 && arg[0] == '-' && arg[1] == '-' )
 			{
 				if( !MatchLongParm(lopt, loml, nlopt, arg) )
 				{
-					cout << vhp.cmd << ": unrecognized option \'" << arg << "\'\n";
-					cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+					cerr << vhp.cmd << ": unrecognized option '" << arg << "'\n";
+					cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 					return 1;
 				}
 			}
@@ -824,13 +907,13 @@ int main(int argc, char** argv)
 						auto s = GetParameter(argv, i, j, hw);
 						if( s != string() )
 						{
-							cout << vhp.cmd << ": invalid length: \'" << s << "\'\n";
+							cerr << vhp.cmd << ": invalid length: '" << s << "'\n";
 							return 1;
 						}
 						if( !vhp.set_hash_width(hw) )
 						{
-							cout << vhp.cmd << ": invalid length: \'" << hw << "\'\n";
-							cout << vhp.cmd << ": length must be 32, 64, 128, 256, 512, or 1024\n";
+							cerr << vhp.cmd << ": invalid length: '" << hw << "'\n";
+							cerr << vhp.cmd << ": length must be 32, 64, 128, 256, 512, or 1024\n";
 							return 1;
 						}
 						j = arg.length();
@@ -854,17 +937,14 @@ int main(int argc, char** argv)
 						vhp.lgZero = true;
 					else
 					{
-						cout << vhp.cmd << ": invalid option -- \'" << arg[j] << "\'\n";
-						cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+						cerr << vhp.cmd << ": invalid option -- '" << arg[j] << "'\n";
+						cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 						return 1;
 					}
 				}
 			}
 			else if( arg == "--" )
-			{
-				VerifyOptions( vhp );
 				lgOptions = false;
-			}
 			else if( arg == "--avx2" )
 				vhp.SIMDversion = IS_AVX2;
 			else if( arg == "--avx512" )
@@ -886,13 +966,13 @@ int main(int argc, char** argv)
 				auto s = GetParameter(argv, i, -1, hw);
 				if( s != string() )
 				{
-					cout << vhp.cmd << ": invalid length: \'" << s << "\'\n";
+					cerr << vhp.cmd << ": invalid length: '" << s << "'\n";
 					return 1;
 				}
 				if( !vhp.set_hash_width(hw) )
 				{
-					cout << vhp.cmd << ": invalid length: \'" << hw << "\'\n";
-					cout << vhp.cmd << ": length must be 32, 64, 128, 256, 512, or 1024\n";
+					cerr << vhp.cmd << ": invalid length: '" << hw << "'\n";
+					cerr << vhp.cmd << ": length must be 32, 64, 128, 256, 512, or 1024\n";
 					return 1;
 				}
 			}
@@ -923,38 +1003,44 @@ int main(int argc, char** argv)
 				vhp.lgZero = true;
 			else
 			{
-				cout << vhp.cmd << ": unrecognized option \'" << arg << "\'\n";
-				cout << "Try \'" << vhp.cmd << " --help\' for more information.\n";
+				cerr << vhp.cmd << ": unrecognized option '" << arg << "'\n";
+				cerr << "Try '" << vhp.cmd << " --help' for more information.\n";
 				return 1;
 			}
 		}
-		else
+	}
+
+	VerifyOptions( vhp );
+
+	if( fnam.size() == 0 )
+	{
+		// no file name was given -> process stdin
+		ProcessFile( vhp, "-", 0 );
+	}
+	else
+	{
+		for( const auto& file : fnam )
 		{
-			if( arg == "-" )
+			if( file == "-" )
 			{
-				ProcessFile( vhp, arg, 0 );
+				ProcessFile( vhp, file, 0 );
 			}
 			else
 			{
-				FILE* io = fopen( arg.c_str(), vhp.option().c_str() );
+				FILE* io = fopen( file.c_str(), vhp.option().c_str() );
 				if( io == 0 )
 				{
-					cout << vhp.cmd << ": " << arg << ": No such file or directory\n";
+					cerr << vhp.cmd << ": " << escfn(file) << ": No such file or directory\n";
 					vhp.returncode = 1;
 				}
 				else
 				{
-					ProcessFile( vhp, arg, io );
+					ProcessFile( vhp, file, io );
 					fclose( io );
 				}
 			}
 		}
 	}
-	if( lgOptions )
-	{
-		VerifyOptions( vhp );
-		// no file name was given -> process stdin
-		ProcessFile( vhp, "-", 0 );
-	}
+
 	return vhp.returncode;
 }
