@@ -154,42 +154,89 @@ inline void posix_memalign_free(void *p)
 }
 #endif
 
+struct pstr
+{
+	string s;
+	unsigned char c;
+	pstr() : c('\0') {}
+	pstr(bool lgEsc) { c = lgEsc ? '\'' : '\0'; } 
+};
+
 inline string escfn(const string& s)
 {
 	// TODO this routine is too simplistic and needs more work... It ignores locale and trigraphs.
-	bool lgEsc = ( s.size() == 0 || s[0] == '~' || s.find_first_of("!\"#$&'()*,;<=>?[]\\^`{}|: ") != string::npos );
-	string es;
+	if( s.size() == 0 )
+		return "''";
+
+	bool lgEsc = ( s[0] == '~' || s[0] == '#' || s.find_first_of("!\"$&()*;<=>?[\\^`|: ") != string::npos );
+
+	pstr es1(lgEsc);
+	vector<pstr> es;
 	for( auto c : s )
 	{
 		if( iscntrl(c) )
 		{
-			es += "'$'\\";
-			if( c == '\f' )
-				es += "f''";
+			es1.c = '\'';
+			es.emplace_back(es1);
+			es1 = pstr();
+			es1.s += "$'\\";
+			if( c == '\a' )
+				es1.s += "a'";
+			else if( c == '\b' )
+				es1.s += "b'";
+			else if( c == '\f' )
+				es1.s += "f'";
 			else if( c == '\n' )
-				es += "n''";
+				es1.s += "n'";
 			else if( c == '\r' )
-				es += "r''";
+				es1.s += "r'";
 			else if( c == '\t' )
-				es += "t''";
+				es1.s += "t'";
 			else if( c == '\v' )
-				es += "v''";
+				es1.s += "v'";
 			else
 			{
 				ostringstream oss;
-				// this would be incorrect for the \0 byte, but that is not allowed in file names anyway...
-				oss << "0" << oct << ((unsigned int)c&0xff) << "''";
-				es += oss.str();
+				oss << setw(3) << setfill('0') << oct << ((unsigned int)c&0xff) << "'";
+				es1.s += oss.str();
 			}
-			lgEsc = true;
+			es.emplace_back(es1);
+			es1 = pstr(true);
 		}
 		else
-			es.append(1, c);
+		{
+			if( c == '\'' )
+			{
+				if( es1.c == '\'' )
+				{
+					es.emplace_back(es1);
+					es1 = pstr();
+					es1.s = "\\'";
+					es.emplace_back(es1);
+					es1 = pstr(true);
+				}
+				else
+				{
+					es1.c = '"';
+					es1.s.append(1, c);
+				}
+			}
+			else
+				es1.s.append(1, c);
+		}
 	}
-	if( lgEsc )
-		return "'" + es + "'";
-	else
-		return s;
+	if( es1.s.size() > 0 )
+		es.emplace_back(es1);
+	ostringstream oss;
+	for( const auto& p : es )
+	{
+		if( p.c != '\0' )
+			oss << p.c;
+		oss << p.s;
+		if( p.c != '\0' )
+			oss << p.c;
+	}
+	return oss.str();
 }
 
 static string VHstream(const vh_params& vhp, FILE* io)
@@ -459,15 +506,15 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 	size_t correct = 0;
 	size_t lineno= 0 ;
 	// do not allow upper case hexadecimal digits as unmodified output should always be lower case
-	const regex bsd_format( "^(\\\\)?VH([[:d:]]+) \\((.+)\\) = ([[:d:]a-f]+)$" );
-	const regex std_format( "^(\\\\)?([[:d:]a-f]+) ([ *])(.+)$" );
+	const regex bsd_format( "^(\\\\)?VH([[:d:]]+) \\(([^\\n]+)\\) = ([[:d:]a-f]+)$" );
+	const regex std_format( "^(\\\\)?([[:d:]a-f]+) ([ *])([^\\n]+)$" );
 	while( read_whole_line(line, io) )
 	{
 		while( true )
 		{
 			// erase trailing newline
 			char c = line.back();
-			if( c != '\n' && c != '\r' )
+			if( c != '\n' )
 				break;
 			line.pop_back();
 		}
