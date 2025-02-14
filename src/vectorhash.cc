@@ -599,7 +599,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 		if( vhsum2.length() == 0 && !vhp.lgIgnoreMissing )
 		{
 			if( !vhp.lgStatusOnly )
-				cerr << esc << ": FAILED open or read\n";
+				cout << esc << ": FAILED open or read\n";
 			vhp.returncode = 1;
 			++ioerror;
 		}
