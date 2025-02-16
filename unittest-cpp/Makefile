@@ -8,11 +8,13 @@ RM = rm
 CCDEP = $(CXX)
 CCDEPFLAGS = -std=c++11 -g -W
 
-.PHONY: all clean
+.PHONY: all lib32 clean
 
 .SUFFIXES: .o .cpp
 
 lib = libUnitTest++.a
+lib64 = lib64/$(lib)
+lib32 = lib32/$(lib)
 test = TestUnitTest++
 
 RANLIB := ${shell which ranlib}
@@ -74,8 +76,11 @@ test_src = UnitTest++/tests/Main.cpp \
 	UnitTest++/tests/TestXmlTestReporter.cpp
 
 objects = $(patsubst %.cpp, %.o, $(src))
+objects64 = $(patsubst UnitTest++/%, lib64/%, $(objects))
+objects32 = $(patsubst UnitTest++/%, lib32/%, $(objects))
 test_objects = $(patsubst %.cpp, %.o, $(test_src))
-dependencies = $(subst .o,.d,$(objects))
+dependencies64 = $(subst .o,.d,$(objects64))
+dependencies32 = $(subst .o,.d,$(objects32))
 test_dependencies = $(subst .o,.d,$(test_objects))
 
 define make-depend
@@ -92,26 +97,43 @@ endef
 
 all: $(test)
 
-$(lib): $(objects) 
-	@echo Creating $(lib) library...
-	ar cr $(lib) $(objects)
-	$(RANLIB) $(lib)
+lib32: $(lib32)
 
-$(test): $(lib) $(test_objects)
+$(lib64): $(objects64) 
+	@echo Creating $(lib64) library...
+	ar cr $(lib64) $(objects64)
+	$(RANLIB) $(lib64)
+
+$(lib32): $(objects32) 
+	@echo Creating $(lib32) library...
+	ar cr $(lib32) $(objects32)
+	$(RANLIB) $(lib32)
+
+$(test): $(lib64) $(test_objects)
 	@echo Linking $(test)...
-	$(CXX) $(LDFLAGS) -o $(test) $(test_objects) $(lib) $(LDLIBS)
+	$(CXX) $(LDFLAGS) -o $(test) $(test_objects) $(lib64) $(LDLIBS)
 	@echo Running unit tests...
 	./$(test)
 
 clean:
-	-@$(RM) -f $(objects) $(test_objects) $(dependencies) $(test_dependencies) $(test) $(lib) 2> /dev/null
+	-@$(RM) -f $(objects64) $(objects32) $(test_objects) $(lib64) $(lib32) 2> /dev/null
+	-@$(RM) -f $(dependencies64) $(dependencies32) $(test_dependencies) $(test) 2> /dev/null
+
+lib64/%.o : UnitTest++/%.cpp
+	@$(call make-depend,$<,$@,$(subst .o,.d,$@))
+	$(CXX) $(CCFLAGS) -c -o $@ $<
+
+lib32/%.o : UnitTest++/%.cpp
+	@$(call make-depend,$<,$@,$(subst .o,.d,$@))
+	$(CXX) $(CCFLAGS) -m32 -c -o $@ $<
 
 %.o : %.cpp
 	@$(call make-depend,$<,$@,$(subst .o,.d,$@))
-	$(CXX) $(CCFLAGS) -c -o $(patsubst %.cpp,%.o,$<) $<
+	$(CXX) $(CCFLAGS) -c -o $@ $<
 
 
 ifneq "$(MAKECMDGOALS)" "clean"
--include $(dependencies)
+-include $(dependencies64)
+-include $(dependencies32)
 -include $(test_dependencies)
 endif
