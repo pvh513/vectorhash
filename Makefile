@@ -25,7 +25,7 @@ else
 endif
 
 # DEP_GOALS will be an empty string for targets that don't need Makefile.dep
-NODEP_GOALS = testclean clean distclean
+NODEP_GOALS = testclean clean distclean install
 DEP_GOALS = $(filter-out $(NODEP_GOALS),$(MAKECMDGOALS))
 
 # the default target does need Makefile.dep
@@ -67,7 +67,7 @@ distclean: clean
 	$(MAKE) clean
 
 bin/vh32sum: lib64/vectorhash.o lib64/libvhsum.a
-	$(CXX) src/vectorhash.o $(LDFLAGS) -o $@
+	$(CXX) lib64/vectorhash.o $(LDFLAGS) -o $@
 
 bin/vh64sum: bin/vh32sum
 	ln -f bin/vh32sum bin/vh64sum
@@ -106,7 +106,7 @@ install:
 	mkdir -p $(INSTALLDIR)/$(LIBDIR64)
 	cp -af lib64/libvhsum.a $(INSTALLDIR)/$(LIBDIR64)
 	mkdir -p $(INSTALLDIR)/$(LIBDIR32)
-	cp -af lib32/libvhsum.a $(INSTALLDIR)/$(LIBDIR32)
+	cp -af lib32/libvhsum.a $(INSTALLDIR)/$(LIBDIR32) 2> /dev/null || :
 	mkdir -p $(INSTALLDIR)/include
 	cp -af src/vectorhash.h $(INSTALLDIR)/include
 	mkdir -p $(INSTALLDIR)/man/man1
