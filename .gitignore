@@ -1,7 +1,6 @@
 *.o
 *.d
 *~
-cpuid/libcpuid.a
 libvhsum.a
 tests/TestMain
 unittest-cpp/TestUnitTest++
@@ -12,3 +11,4 @@ vh128sum
 vh256sum
 vh512sum
 vh1024sum
+Makefile.dep

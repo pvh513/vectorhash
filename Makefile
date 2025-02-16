@@ -1,9 +1,12 @@
+.PHONY: all default lib32 testclean clean distclean check install
+
 CXX = g++
 CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops
-LDFLAGS = -lvhsum -L.
+LDFLAGS = -lvhsum -Llib64
 
 INSTALLDIR = /usr/local
-LIBDIR = lib64
+LIBDIR64 = lib64
+LIBDIR32 = lib
 
 RANLIB := ${shell which ranlib}
 ifneq ($(RANLIB),)
@@ -21,195 +24,81 @@ else
   GZEXT =
 endif
 
+# DEP_GOALS will be an empty string for targets that don't need Makefile.dep
+NODEP_GOALS = testclean clean distclean
+DEP_GOALS = $(filter-out $(NODEP_GOALS),$(MAKECMDGOALS))
 
-.PHONY: all default testclean clean distclean install check
+# the default target does need Makefile.dep
+ifeq ($(MAKECMDGOALS),)
+  DEP_GOALS = need_dependencies
+endif
+
+ifneq ($(DEP_GOALS),)
+  $(shell script/generate_deps.sh "$(CXX)" "$(CXXFLAGS)" > Makefile.dep)
+endif
 
 all: default
 
-default: vh32sum vh64sum vh128sum vh256sum vh512sum vh1024sum libvhsum.a
+default: bin/vh32sum bin/vh64sum bin/vh128sum bin/vh256sum bin/vh512sum bin/vh1024sum lib64/libvhsum.a
+
+lib32: lib32/libvhsum.a
 
 testclean:
 	cd tests; \
 	$(MAKE) clean
 
 clean: testclean
-	rm -f src/*.o
-	rm -f vh32sum
-	rm -f vh64sum
-	rm -f vh128sum
-	rm -f vh256sum
-	rm -f vh512sum
-	rm -f vh1024sum
-	rm -f libvhsum.a
+	rm -f Makefile.dep
+	rm -f lib64/*.o
+	rm -f lib64/*/*.o
+	rm -f lib32/*.o
+	rm -f lib32/*/*.o
+	rm -f lib64/libvhsum.a
+	rm -f lib32/libvhsum.a
+	rm -f bin/vh32sum
+	rm -f bin/vh64sum
+	rm -f bin/vh128sum
+	rm -f bin/vh256sum
+	rm -f bin/vh512sum
+	rm -f bin/vh1024sum
 
 distclean: clean
-	cd cpuid; \
-	$(MAKE) clean
 	cd unittest-cpp; \
 	$(MAKE) clean
 
-vh32sum: src/vectorhash.o cpuid/libcpuid.a libvhsum.a
+bin/vh32sum: lib64/vectorhash.o lib64/libvhsum.a
 	$(CXX) src/vectorhash.o $(LDFLAGS) -o $@
 
-vh64sum: vh32sum
-	ln -f vh32sum vh64sum
+bin/vh64sum: bin/vh32sum
+	ln -f bin/vh32sum bin/vh64sum
 
-vh128sum: vh32sum
-	ln -f vh32sum vh128sum
+bin/vh128sum: bin/vh32sum
+	ln -f bin/vh32sum bin/vh128sum
 
-vh256sum: vh32sum
-	ln -f vh32sum vh256sum
+bin/vh256sum: bin/vh32sum
+	ln -f bin/vh32sum bin/vh256sum
 
-vh512sum: vh32sum
-	ln -f vh32sum vh512sum
+bin/vh512sum: bin/vh32sum
+	ln -f bin/vh32sum bin/vh512sum
 
-vh1024sum: vh32sum
-	ln -f vh32sum vh1024sum
-
-src/vectorhash.o: src/vectorhash.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_avx512.h \
-	src/vectorhash_avx2.h src/vectorhash_sse2.h src/vectorhash_scalar.h
-	$(CXX) $(CXXFLAGS) -c src/vectorhash.cc -o $@
-
-src/vectorhash_core.o: src/vectorhash_core.cc src/vectorhash.h src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx512.h src/vectorhash_avx2.h src/vectorhash_sse2.h src/vectorhash_scalar.h
-	$(CXX) $(CXXFLAGS) -c src/vectorhash_core.cc -o $@
-
-src/vectorhash_finalize_32.o: src/vectorhash_finalize.cc src/vectorhash_priv.h src/vectorhash_core.h
-	$(CXX) $(CXXFLAGS) -c -DVH32 src/vectorhash_finalize.cc -o $@
-
-src/vectorhash_finalize_64.o: src/vectorhash_finalize.cc src/vectorhash_priv.h src/vectorhash_core.h
-	$(CXX) $(CXXFLAGS) -c -DVH64 src/vectorhash_finalize.cc -o $@
-
-src/vectorhash_finalize_128.o: src/vectorhash_finalize.cc src/vectorhash_priv.h src/vectorhash_core.h
-	$(CXX) $(CXXFLAGS) -c -DVH128 src/vectorhash_finalize.cc -o $@
-
-src/vectorhash_finalize_256.o: src/vectorhash_finalize.cc src/vectorhash_priv.h src/vectorhash_core.h
-	$(CXX) $(CXXFLAGS) -c -DVH256 src/vectorhash_finalize.cc -o $@
-
-src/vectorhash_finalize_512.o: src/vectorhash_finalize.cc src/vectorhash_priv.h src/vectorhash_core.h
-	$(CXX) $(CXXFLAGS) -c -DVH512 src/vectorhash_finalize.cc -o $@
-
-src/vectorhash_finalize_1024.o: src/vectorhash_finalize.cc src/vectorhash_priv.h src/vectorhash_core.h
-	$(CXX) $(CXXFLAGS) -c -DVH1024 src/vectorhash_finalize.cc -o $@
-
-src/vectorhash_avx512_32.o: src/vectorhash_avx512.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx512.h
-	$(CXX) $(CXXFLAGS) -c -DVH32 -mavx512f src/vectorhash_avx512.cc -o $@
-
-src/vectorhash_avx512_64.o: src/vectorhash_avx512.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx512.h
-	$(CXX) $(CXXFLAGS) -c -DVH64 -mavx512f src/vectorhash_avx512.cc -o $@
-
-src/vectorhash_avx512_128.o: src/vectorhash_avx512.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx512.h
-	$(CXX) $(CXXFLAGS) -c -DVH128 -mavx512f src/vectorhash_avx512.cc -o $@
-
-src/vectorhash_avx512_256.o: src/vectorhash_avx512.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx512.h
-	$(CXX) $(CXXFLAGS) -c -DVH256 -mavx512f src/vectorhash_avx512.cc -o $@
-
-src/vectorhash_avx512_512.o: src/vectorhash_avx512.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx512.h
-	$(CXX) $(CXXFLAGS) -c -DVH512 -mavx512f src/vectorhash_avx512.cc -o $@
-
-src/vectorhash_avx512_1024.o: src/vectorhash_avx512.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx512.h
-	$(CXX) $(CXXFLAGS) -c -DVH1024 -mavx512f src/vectorhash_avx512.cc -o $@
-
-src/vectorhash_avx2_32.o: src/vectorhash_avx2.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx2.h
-	$(CXX) $(CXXFLAGS) -c -DVH32 -mavx2 src/vectorhash_avx2.cc -o $@
-
-src/vectorhash_avx2_64.o: src/vectorhash_avx2.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx2.h
-	$(CXX) $(CXXFLAGS) -c -DVH64 -mavx2 src/vectorhash_avx2.cc -o $@
-
-src/vectorhash_avx2_128.o: src/vectorhash_avx2.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_avx2.h
-	$(CXX) $(CXXFLAGS) -c -DVH128 -mavx2 src/vectorhash_avx2.cc -o $@
-
-src/vectorhash_avx2_256.o: src/vectorhash_avx2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_avx2.h
-	$(CXX) $(CXXFLAGS) -c -DVH256 -mavx2 src/vectorhash_avx2.cc -o $@
-
-src/vectorhash_avx2_512.o: src/vectorhash_avx2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_avx2.h
-	$(CXX) $(CXXFLAGS) -c -DVH512 -mavx2 src/vectorhash_avx2.cc -o $@
-
-src/vectorhash_avx2_1024.o: src/vectorhash_avx2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_avx2.h
-	$(CXX) $(CXXFLAGS) -c -DVH1024 -mavx2 src/vectorhash_avx2.cc -o $@
-
-src/vectorhash_sse2_32.o: src/vectorhash_sse2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_sse2.h
-	$(CXX) $(CXXFLAGS) -c -DVH32 -msse2 src/vectorhash_sse2.cc -o $@
-
-src/vectorhash_sse2_64.o: src/vectorhash_sse2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_sse2.h
-	$(CXX) $(CXXFLAGS) -c -DVH64 -msse2 src/vectorhash_sse2.cc -o $@
-
-src/vectorhash_sse2_128.o: src/vectorhash_sse2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_sse2.h
-	$(CXX) $(CXXFLAGS) -c -DVH128 -msse2 src/vectorhash_sse2.cc -o $@
-
-src/vectorhash_sse2_256.o: src/vectorhash_sse2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_sse2.h
-	$(CXX) $(CXXFLAGS) -c -DVH256 -msse2 src/vectorhash_sse2.cc -o $@
-
-src/vectorhash_sse2_512.o: src/vectorhash_sse2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_sse2.h
-	$(CXX) $(CXXFLAGS) -c -DVH512 -msse2 src/vectorhash_sse2.cc -o $@
-
-src/vectorhash_sse2_1024.o: src/vectorhash_sse2.cc src/vectorhash_priv.h src/vectorhash_core.h src/vectorhash_sse2.h
-	$(CXX) $(CXXFLAGS) -c -DVH1024 -msse2 src/vectorhash_sse2.cc -o $@
-
-src/vectorhash_scalar_32.o: src/vectorhash_scalar.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_scalar.h
-	$(CXX) $(CXXFLAGS) -c -DVH32 src/vectorhash_scalar.cc -o $@
-
-src/vectorhash_scalar_64.o: src/vectorhash_scalar.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_scalar.h
-	$(CXX) $(CXXFLAGS) -c -DVH64 src/vectorhash_scalar.cc -o $@
-
-src/vectorhash_scalar_128.o: src/vectorhash_scalar.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_scalar.h
-	$(CXX) $(CXXFLAGS) -c -DVH128 src/vectorhash_scalar.cc -o $@
-
-src/vectorhash_scalar_256.o: src/vectorhash_scalar.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_scalar.h
-	$(CXX) $(CXXFLAGS) -c -DVH256 src/vectorhash_scalar.cc -o $@
-
-src/vectorhash_scalar_512.o: src/vectorhash_scalar.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_scalar.h
-	$(CXX) $(CXXFLAGS) -c -DVH512 src/vectorhash_scalar.cc -o $@
-
-src/vectorhash_scalar_1024.o: src/vectorhash_scalar.cc src/vectorhash_priv.h src/vectorhash_core.h \
-	src/vectorhash_scalar.h
-	$(CXX) $(CXXFLAGS) -c -DVH1024 src/vectorhash_scalar.cc -o $@
-
-cpuid/libcpuid.a:
-	cd cpuid; \
-	$(MAKE)
+bin/vh1024sum: bin/vh32sum
+	ln -f bin/vh32sum bin/vh1024sum
 
 unittest-cpp/libUnitTest++.a:
 	cd unittest-cpp; \
 	$(MAKE)
 
-libvhsum.a: src/vectorhash_core.o src/vectorhash_finalize_32.o src/vectorhash_finalize_64.o \
-	src/vectorhash_finalize_128.o src/vectorhash_finalize_256.o src/vectorhash_finalize_512.o \
-	src/vectorhash_finalize_1024.o src/vectorhash_scalar_32.o src/vectorhash_scalar_64.o \
-	src/vectorhash_scalar_128.o src/vectorhash_scalar_256.o src/vectorhash_scalar_512.o \
-	src/vectorhash_scalar_1024.o src/vectorhash_sse2_32.o src/vectorhash_sse2_64.o \
-	src/vectorhash_sse2_128.o src/vectorhash_sse2_256.o src/vectorhash_sse2_512.o \
-	src/vectorhash_sse2_1024.o src/vectorhash_avx2_32.o src/vectorhash_avx2_64.o \
-	src/vectorhash_avx2_128.o src/vectorhash_avx2_256.o src/vectorhash_avx2_512.o \
-	src/vectorhash_avx2_1024.o src/vectorhash_avx512_32.o src/vectorhash_avx512_64.o \
-	src/vectorhash_avx512_128.o src/vectorhash_avx512_256.o src/vectorhash_avx512_512.o \
-	src/vectorhash_avx512_1024.o cpuid/cpuinfo.o cpuid/version.o
-	ar cr libvhsum.a $^
-	${RANLIB} libvhsum.a
-
-check: cpuid/libcpuid.a unittest-cpp/libUnitTest++.a libvhsum.a
+check: unittest-cpp/libUnitTest++.a lib64/libvhsum.a
 	cd tests; \
 	$(MAKE)
 
-install: vh32sum vh64sum vh128sum vh256sum vh512sum vh1024sum libvhsum.a
+install:
 	mkdir -p $(INSTALLDIR)/bin
-	cp -af vh32sum vh64sum vh128sum vh256sum vh512sum vh1024sum $(INSTALLDIR)/bin
-	mkdir -p $(INSTALLDIR)/$(LIBDIR)
-	cp -af libvhsum.a $(INSTALLDIR)/$(LIBDIR)
+	cp -af bin/vh*sum $(INSTALLDIR)/bin
+	mkdir -p $(INSTALLDIR)/$(LIBDIR64)
+	cp -af lib64/libvhsum.a $(INSTALLDIR)/$(LIBDIR64)
+	mkdir -p $(INSTALLDIR)/$(LIBDIR32)
+	cp -af lib32/libvhsum.a $(INSTALLDIR)/$(LIBDIR32)
 	mkdir -p $(INSTALLDIR)/include
 	cp -af src/vectorhash.h $(INSTALLDIR)/include
 	mkdir -p $(INSTALLDIR)/man/man1
@@ -225,3 +114,7 @@ install: vh32sum vh64sum vh128sum vh256sum vh512sum vh1024sum libvhsum.a
 	cp -af man/VectorHash.3 $(INSTALLDIR)/man/man3
 	cd $(INSTALLDIR)/man/man3; \
 	$(GZIP) VectorHash.3
+
+ifneq ($(DEP_GOALS),)
+include Makefile.dep
+endif
