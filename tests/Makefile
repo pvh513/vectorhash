@@ -2,13 +2,13 @@
 
 CXX = g++
 CXXFLAGS = -g -W -Wall -ansi -std=c++11 -O0 -I../src -I../cpuid -I../unittest-cpp
-LDFLAGS = -lUnitTest++ -L../unittest-cpp -lvhsum
+LDFLAGS = -lUnitTest++ -lvhsum
 
 ifeq ($(MAKECMDGOALS),check32)
   CXXFLAGS += -m32
-  LDFLAGS += -L../lib32 -m32
+  LDFLAGS += -L../unittest-cpp/lib32 -L../lib32 -m32
 else
-  LDFLAGS += -L../lib64
+  LDFLAGS += -L../unittest-cpp/lib64 -L../lib64
 endif
 
 all: check64

@@ -1,4 +1,4 @@
-.PHONY: all default lib32 testclean clean distclean check install
+.PHONY: all default lib32 testclean clean distclean check check32 install
 
 CXX = g++
 CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops
@@ -84,13 +84,21 @@ bin/vh512sum: bin/vh32sum
 bin/vh1024sum: bin/vh32sum
 	ln -f bin/vh32sum bin/vh1024sum
 
-unittest-cpp/libUnitTest++.a:
+unittest-cpp/lib64/libUnitTest++.a:
 	cd unittest-cpp; \
 	$(MAKE)
 
-check: unittest-cpp/libUnitTest++.a lib64/libvhsum.a
+unittest-cpp/lib32/libUnitTest++.a:
+	cd unittest-cpp; \
+	$(MAKE) lib32
+
+check: unittest-cpp/lib64/libUnitTest++.a lib64/libvhsum.a
 	cd tests; \
 	$(MAKE)
+
+check32: unittest-cpp/lib32/libUnitTest++.a lib32/libvhsum.a
+	cd tests; \
+	$(MAKE) check32
 
 install:
 	mkdir -p $(INSTALLDIR)/bin
