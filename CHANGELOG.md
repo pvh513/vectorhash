@@ -10,7 +10,7 @@ also has a scalar version for non-Intel platforms. The resulting checksum is
 identical for each of these instruction sets. The supported instruction sets
 will be detected automatically during runtime.
 
-### Release philosophy
+### Release Strategy
 
 The initial development will be aimed at finalizing the main functionality of the code
 and doing more advanced tests in order to flush out the remaining bugs. During
@@ -39,3 +39,6 @@ change (at least for versions v1.x).
 
 #### Release v0.3 was created on 14 Feb 2025.
 
+- Add support for building 32-bit libraries on 64-bit operating systems.
+
+#### Release v0.4 was created on 16 Feb 2025.
