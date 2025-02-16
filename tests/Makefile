@@ -1,15 +1,30 @@
+.PHONY: all check64 check32 clean
+
 CXX = g++
 CXXFLAGS = -g -W -Wall -ansi -std=c++11 -O0 -I../src -I../cpuid -I../unittest-cpp
-LDFLAGS = -lcpuid -L../cpuid -lUnitTest++ -L../unittest-cpp -lvhsum -L..
+LDFLAGS = -lUnitTest++ -lvhsum
 
-.PHONY: all clean
+ifeq ($(MAKECMDGOALS),check32)
+  CXXFLAGS += -m32
+  LDFLAGS += -L../unittest-cpp/lib32 -L../lib32 -m32
+else
+  LDFLAGS += -L../unittest-cpp/lib64 -L../lib64
+endif
 
-all: TestMain run_tests.sh
+all: check64
+
+check64: TestMain run_tests.sh
 	@echo "=============================="
 	@echo " Starting VectorHash tests... "
 	@echo "=============================="
 	./TestMain
 	./run_tests.sh
+
+check32: TestMain
+	@echo "=============================="
+	@echo " Starting VectorHash tests... "
+	@echo "=============================="
+	./TestMain
 
 clean:
 	rm -f *.o

@@ -112,9 +112,10 @@ and similarly for other checksum widths.
 
 ### The libvhsum library
 
-After building and installing the code you will have a 64-bit static library
-called <tt>libvhsum.a</tt>. This library exports a routine that will allow you
-to perform a checksum on a buffer. The declaration for the call is:
+After building and installing the code you will have a 64-bit (and/or 32-bit)
+static library called <tt>libvhsum.a</tt>. This library exports a routine that
+will allow you to perform a checksum on a buffer. The declaration for the call
+is:
 
     #include <vectorhash.h>
     void VectorHash(const void *buf, size_t len, uint32_t seed, void *out, size_t hw);
@@ -184,8 +185,8 @@ contained in the cpuid subdirectory is a somewhat simplified version of the
 9.0.1 release of cpuid. The most important modification is to remove the python
 dependency for the build process. The original license and documentation have
 been retained, so the latter still refers to the python build process, which no
-longer works in this version. A simple Makefile has been added instead. The
-cpuid library is distributed with a BSD-style copyright license.
+longer works in this version. The cpuid library is distributed with a BSD-style
+copyright license.
 
 ### The unittest-cpp library
 
