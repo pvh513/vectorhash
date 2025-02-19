@@ -520,7 +520,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 		}
 		++lineno;
 
-		bool lgBinary, lgEscape;
+		bool lgEscape;
 		size_t hashlen = vhp.vh_hash_width/4;
 		string vhsum1, path;
 		smatch what;
@@ -532,7 +532,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			iss >> my_width;
 			path = what[3];
 			vhsum1 = what[4];
-			lgBinary = true;
+			vhp.lgBinary = true;
 			if( my_width != vhp.vh_hash_width || vhsum1.length() != hashlen )
 			{
 				if( vhp.lgWarnSyntax )
@@ -549,7 +549,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 		{
 			lgEscape = what[1].matched;
 			vhsum1 = what[2];
-			lgBinary = ( what[3] == "*" );
+			vhp.lgBinary = ( what[3] == "*" );
 			path = what[4];
 			if( vhsum1.length() != hashlen )
 			{
@@ -580,7 +580,7 @@ static void CheckFiles(vh_params& vhp, const string& arg, FILE* io)
 			esc = "\\" + Escape( path );
 		else
 			esc = path;
-		FILE* io = fopen( path.c_str(), ( lgBinary ? "rb" : "r" ) );
+		FILE* io = fopen( path.c_str(), ( vhp.lgBinary ? "rb" : "r" ) );
 		string vhsum2;
 		if( io == 0 )
 		{
