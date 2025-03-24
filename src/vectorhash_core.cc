@@ -50,168 +50,183 @@ is_type GetSIMDVersion()
 #endif
 }
 
-void VectorHashBody32(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[],
-					  size_t hash_width)
+void VectorHashBody32(const uint32_t* data, uint32_t h1[], uint32_t h2[], uint32_t h3[], uint32_t h4[], size_t hw)
 {
-	if( hash_width == 32 )
+	uint32_t rhw =  pow2roundup(hw);
+	if( rhw == 32 )
 		VectorHashBody32_32(data, h1, h2, h3, h4);
-	else if( hash_width == 64 )
+	else if( rhw == 64 )
 		VectorHashBody32_64(data, h1, h2, h3, h4);
-	else if( hash_width == 128 )
+	else if( rhw == 128 )
 		VectorHashBody32_128(data, h1, h2, h3, h4);
-	else if( hash_width == 256 )
+	else if( rhw == 256 )
 		VectorHashBody32_256(data, h1, h2, h3, h4);
-	else if( hash_width == 512 )
+	else if( rhw == 512 )
 		VectorHashBody32_512(data, h1, h2, h3, h4);
-	else if( hash_width == 1024 )
+	else if( rhw == 1024 )
 		VectorHashBody32_1024(data, h1, h2, h3, h4);
-	else {
-		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
+	else
+	{
+		cout << "Internal error: impossible value for rounded hash width: " << rhw << "." << endl;
 		exit(1);
 	}
 }
 
-void VectorHashBody128(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[], size_t hash_width)
+void VectorHashBody128(const v4si* data, v4si h1[], v4si h2[], v4si h3[], v4si h4[], size_t hw)
 {
-	if( hash_width == 32 )
+	uint32_t rhw =  pow2roundup(hw);
+	if( rhw == 32 )
 		VectorHashBody128_32(data, h1, h2, h3, h4);
-	else if( hash_width == 64 )
+	else if( rhw == 64 )
 		VectorHashBody128_64(data, h1, h2, h3, h4);
-	else if( hash_width == 128 )
+	else if( rhw == 128 )
 		VectorHashBody128_128(data, h1, h2, h3, h4);
-	else if( hash_width == 256 )
+	else if( rhw == 256 )
 		VectorHashBody128_256(data, h1, h2, h3, h4);
-	else if( hash_width == 512 )
+	else if( rhw == 512 )
 		VectorHashBody128_512(data, h1, h2, h3, h4);
-	else if( hash_width == 1024 )
+	else if( rhw == 1024 )
 		VectorHashBody128_1024(data, h1, h2, h3, h4);
-	else {
-		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
+	else
+	{
+		cout << "Internal error: impossible value for rounded hash width: " << rhw << "." << endl;
 		exit(1);
 	}
 }
 
-void VectorHashBody256(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[], size_t hash_width)
+void VectorHashBody256(const v8si* data, v8si h1[], v8si h2[], v8si h3[], v8si h4[], size_t hw)
 {
-	if( hash_width == 32 )
+	uint32_t rhw =  pow2roundup(hw);
+	if( rhw == 32 )
 		VectorHashBody256_32(data, h1, h2, h3, h4);
-	else if( hash_width == 64 )
+	else if( rhw == 64 )
 		VectorHashBody256_64(data, h1, h2, h3, h4);
-	else if( hash_width == 128 )
+	else if( rhw == 128 )
 		VectorHashBody256_128(data, h1, h2, h3, h4);
-	else if( hash_width == 256 )
+	else if( rhw == 256 )
 		VectorHashBody256_256(data, h1, h2, h3, h4);
-	else if( hash_width == 512 )
+	else if( rhw == 512 )
 		VectorHashBody256_512(data, h1, h2, h3, h4);
-	else if( hash_width == 1024 )
+	else if( rhw == 1024 )
 		VectorHashBody256_1024(data, h1, h2, h3, h4);
-	else {
-		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
+	else
+	{
+		cout << "Internal error: impossible value for rounded hash width: " << rhw << "." << endl;
 		exit(1);
 	}
 }
 
-void VectorHashBody512(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v16si h4[], size_t hash_width)
+void VectorHashBody512(const v16si* data, v16si h1[], v16si h2[], v16si h3[], v16si h4[], size_t hw)
 {
-	if( hash_width == 32 )
+	uint32_t rhw =  pow2roundup(hw);
+	if( rhw == 32 )
 		VectorHashBody512_32(data, h1, h2, h3, h4);
-	else if( hash_width == 64 )
+	else if( rhw == 64 )
 		VectorHashBody512_64(data, h1, h2, h3, h4);
-	else if( hash_width == 128 )
+	else if( rhw == 128 )
 		VectorHashBody512_128(data, h1, h2, h3, h4);
-	else if( hash_width == 256 )
+	else if( rhw == 256 )
 		VectorHashBody512_256(data, h1, h2, h3, h4);
-	else if( hash_width == 512 )
+	else if( rhw == 512 )
 		VectorHashBody512_512(data, h1, h2, h3, h4);
-	else if( hash_width == 1024 )
+	else if( rhw == 1024 )
 		VectorHashBody512_1024(data, h1, h2, h3, h4);
-	else {
-		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
+	else
+	{
+		cout << "Internal error: impossible value for rounded hash width: " << rhw << "." << endl;
 		exit(1);
 	}
 }
 
-static void VectorHash32(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
+static void VectorHash32(const void* buf, size_t len, uint32_t seed, void* out, size_t hw)
 {
-	if( hash_width == 32 )
-		VectorHash32_32(buf, len, seed, out);
-	else if( hash_width == 64 )
-		VectorHash32_64(buf, len, seed, out);
-	else if( hash_width == 128 )
-		VectorHash32_128(buf, len, seed, out);
-	else if( hash_width == 256 )
-		VectorHash32_256(buf, len, seed, out);
-	else if( hash_width == 512 )
-		VectorHash32_512(buf, len, seed, out);
-	else if( hash_width == 1024 )
-		VectorHash32_1024(buf, len, seed, out);
-	else {
-		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
+	uint32_t rhw =  pow2roundup(hw);
+	if( rhw == 32 )
+		VectorHash32_32(buf, len, seed, out, hw);
+	else if( rhw == 64 )
+		VectorHash32_64(buf, len, seed, out, hw);
+	else if( rhw == 128 )
+		VectorHash32_128(buf, len, seed, out, hw);
+	else if( rhw == 256 )
+		VectorHash32_256(buf, len, seed, out, hw);
+	else if( rhw == 512 )
+		VectorHash32_512(buf, len, seed, out, hw);
+	else if( rhw == 1024 )
+		VectorHash32_1024(buf, len, seed, out, hw);
+	else
+	{
+		cout << "Internal error: impossible value for rounded hash width: " << rhw << "." << endl;
 		exit(1);
 	}
 }
 
-static void VectorHash128(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
+static void VectorHash128(const void* buf, size_t len, uint32_t seed, void* out, size_t hw)
 {
-	if( hash_width == 32 )
-		VectorHash128_32(buf, len, seed, out);
-	else if( hash_width == 64 )
-		VectorHash128_64(buf, len, seed, out);
-	else if( hash_width == 128 )
-		VectorHash128_128(buf, len, seed, out);
-	else if( hash_width == 256 )
-		VectorHash128_256(buf, len, seed, out);
-	else if( hash_width == 512 )
-		VectorHash128_512(buf, len, seed, out);
-	else if( hash_width == 1024 )
-		VectorHash128_1024(buf, len, seed, out);
-	else {
-		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
+	uint32_t rhw =  pow2roundup(hw);
+	if( rhw == 32 )
+		VectorHash128_32(buf, len, seed, out, hw);
+	else if( rhw == 64 )
+		VectorHash128_64(buf, len, seed, out, hw);
+	else if( rhw == 128 )
+		VectorHash128_128(buf, len, seed, out, hw);
+	else if( rhw == 256 )
+		VectorHash128_256(buf, len, seed, out, hw);
+	else if( rhw == 512 )
+		VectorHash128_512(buf, len, seed, out, hw);
+	else if( rhw == 1024 )
+		VectorHash128_1024(buf, len, seed, out, hw);
+	else
+	{
+		cout << "Internal error: impossible value for rounded hash width: " << rhw << "." << endl;
 		exit(1);
 	}
 }
 
-static void VectorHash256(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
+static void VectorHash256(const void* buf, size_t len, uint32_t seed, void* out, size_t hw)
 {
-	if( hash_width == 32 )
-		VectorHash256_32(buf, len, seed, out);
-	else if( hash_width == 64 )
-		VectorHash256_64(buf, len, seed, out);
-	else if( hash_width == 128 )
-		VectorHash256_128(buf, len, seed, out);
-	else if( hash_width == 256 )
-		VectorHash256_256(buf, len, seed, out);
-	else if( hash_width == 512 )
-		VectorHash256_512(buf, len, seed, out);
-	else if( hash_width == 1024 )
-		VectorHash256_1024(buf, len, seed, out);
-	else {
-		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
+	uint32_t rhw =  pow2roundup(hw);
+	if( rhw == 32 )
+		VectorHash256_32(buf, len, seed, out, hw);
+	else if( rhw == 64 )
+		VectorHash256_64(buf, len, seed, out, hw);
+	else if( rhw == 128 )
+		VectorHash256_128(buf, len, seed, out, hw);
+	else if( rhw == 256 )
+		VectorHash256_256(buf, len, seed, out, hw);
+	else if( rhw == 512 )
+		VectorHash256_512(buf, len, seed, out, hw);
+	else if( rhw == 1024 )
+		VectorHash256_1024(buf, len, seed, out, hw);
+	else
+	{
+		cout << "Internal error: impossible value for rounded hash width: " << rhw << "." << endl;
 		exit(1);
 	}
 }
 
-static void VectorHash512(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
+static void VectorHash512(const void* buf, size_t len, uint32_t seed, void* out, size_t hw)
 {
-	if( hash_width == 32 )
-		VectorHash512_32(buf, len, seed, out);
-	else if( hash_width == 64 )
-		VectorHash512_64(buf, len, seed, out);
-	else if( hash_width == 128 )
-		VectorHash512_128(buf, len, seed, out);
-	else if( hash_width == 256 )
-		VectorHash512_256(buf, len, seed, out);
-	else if( hash_width == 512 )
-		VectorHash512_512(buf, len, seed, out);
-	else if( hash_width == 1024 )
-		VectorHash512_1024(buf, len, seed, out);
-	else {
-		cout << "Internal error: impossible value for hash width: " << hash_width << "." << endl;
+	uint32_t rhw =  pow2roundup(hw);
+	if( rhw == 32 )
+		VectorHash512_32(buf, len, seed, out, hw);
+	else if( rhw == 64 )
+		VectorHash512_64(buf, len, seed, out, hw);
+	else if( rhw == 128 )
+		VectorHash512_128(buf, len, seed, out, hw);
+	else if( rhw == 256 )
+		VectorHash512_256(buf, len, seed, out, hw);
+	else if( rhw == 512 )
+		VectorHash512_512(buf, len, seed, out, hw);
+	else if( rhw == 1024 )
+		VectorHash512_1024(buf, len, seed, out, hw);
+	else
+	{
+		cout << "Internal error: impossible value for rounded hash width: " << rhw << "." << endl;
 		exit(1);
 	}
 }
 
-void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hash_width)
+void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hw)
 {
 	auto ibuf = reinterpret_cast<uintptr>(buf);
 	// check if the alignment of the pointer in buf is OK
@@ -221,27 +236,28 @@ void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, is_type S
 	// Scalar requires no special alignment
 	if( SIMDversion >= IS_AVX512 && (ibuf&0x3f) == 0 )
 	{
-		VectorHash512(buf, len, seed, out, hash_width);
+		VectorHash512(buf, len, seed, out, hw);
 	}
 	else if( SIMDversion >= IS_AVX2 && (ibuf&0x1f) == 0 )
 	{
-		VectorHash256(buf, len, seed, out, hash_width);
+		VectorHash256(buf, len, seed, out, hw);
 	}
 	else if( SIMDversion >= IS_SSE2 && (ibuf&0x0f) == 0 )
 	{
-		VectorHash128(buf, len, seed, out, hash_width);
+		VectorHash128(buf, len, seed, out, hw);
 	}
 	else if( SIMDversion >= IS_SCALAR )
 	{
-		VectorHash32(buf, len, seed, out, hash_width);
+		VectorHash32(buf, len, seed, out, hw);
 	}
-	else {
+	else
+	{
 		cout << "Internal error: impossible value for SIMD version: " << SIMDversion << "." << endl;
 		exit(1);
 	}
 }
 
-void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width)
+void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, size_t hw)
 {
-	VectorHash(buf, len, seed, out, GetSIMDVersion(), hash_width);
+	VectorHash(buf, len, seed, out, GetSIMDVersion(), hw);
 }

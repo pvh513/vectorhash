@@ -67,24 +67,31 @@ struct vh_params {
 	size_t vh_hash_width;
 	size_t vh_virtreg_width;
 	size_t vh_nstate;
+	size_t vh_nhash;
 	size_t vh_nint;
 	size_t blocksize;
 	bool set_hash_width(size_t hw)
 	{
 		// width of the hash (in bits)
-		// this value MUST be a power of 2 between 32 and 1024
-		if( hw < 32 || hw > 1024 || ((hw & (hw-1)) != 0) )
+		// this value MUST be a multiple of 32 between 32 and 1024
+		if( hw < 32 || hw > 1024 || (hw & size_t{0x1f}) != 0 )
 			return false;
-		vh_hash_width = hw;
+		// initially we will compute a hash that is a power of two wide
+		// as a last step that width will be reduced to the requested width
+		vh_hash_width = pow2roundup(hw);
 		// width of the virtual SIMD register supported in VectorHash (in bits)
 		// must be at least as wide as the largest hardware register that is used
 		vh_virtreg_width = ( 2*vh_hash_width > vh_hwreg_width ) ? 2*vh_hash_width : vh_hwreg_width;
-		// width of the hash in uint32_t elements
+		// width of the rounded hash in uint32_t elements
 		vh_nstate = vh_hash_width/32;
 		// number of uint32_t's that fit in the virtual register
 		vh_nint = vh_virtreg_width/32;
 		// the file is read with this blocksize (in bytes)
 		blocksize = 4*vh_nint*sizeof(uint32_t);
+		// the actual requested hash width
+		vh_hash_width = hw;
+		// width of the actual hash in uint32_t elements
+		vh_nhash = hw/32;
 		// update the name as well...
 		ostringstream oss;
 		oss << "VH" << vh_hash_width;
@@ -271,7 +278,7 @@ static string VHstream(const vh_params& vhp, FILE* io)
 #endif
 
 	ostringstream hash;
-	for( uint32_t i=0; i < vhp.vh_nstate; ++i )
+	for( size_t i=0; i < vhp.vh_nhash; ++i )
 		hash << hex << setfill('0') << setw(8) << state[i];
 
 	return hash.str();
@@ -333,20 +340,20 @@ static string VHstdin(const vh_params& vhp)
 	}
 	posix_memalign_free( map );
 
-	if( vhp.vh_hash_width == 32 )
-		VectorHashFinalize_32(len, z1, z2, z3, z4, state.data());
-	else if( vhp.vh_hash_width == 64 )
-		VectorHashFinalize_64(len, z1, z2, z3, z4, state.data());
-	else if( vhp.vh_hash_width == 128 )
-		VectorHashFinalize_128(len, z1, z2, z3, z4, state.data());
-	else if( vhp.vh_hash_width == 256 )
-		VectorHashFinalize_256(len, z1, z2, z3, z4, state.data());
-	else if( vhp.vh_hash_width == 512 )
-		VectorHashFinalize_512(len, z1, z2, z3, z4, state.data());
-	else if( vhp.vh_hash_width == 1024 )
-		VectorHashFinalize_1024(len, z1, z2, z3, z4, state.data());
+	if( vhp.vh_nstate == 1 )
+		VectorHashFinalize_32(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 2 )
+		VectorHashFinalize_64(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 4 )
+		VectorHashFinalize_128(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 8 )
+		VectorHashFinalize_256(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 16 )
+		VectorHashFinalize_512(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 32 )
+		VectorHashFinalize_1024(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
 	else {
-		cerr << "Internal error: impossible value for hash width: " << vhp.vh_hash_width << "." << endl;
+		cerr << "Internal error: impossible value for vh_nstate: " << vhp.vh_nstate << "." << endl;
 		exit(1);
 	}
 
@@ -356,7 +363,7 @@ static string VHstdin(const vh_params& vhp)
 	posix_memalign_free( h1 );
 
 	ostringstream hash;
-	for( uint32_t i=0; i < vhp.vh_nstate; ++i )
+	for( size_t i=0; i < vhp.vh_nhash; ++i )
 		hash << hex << setfill('0') << setw(8) << state[i];
 
 	return hash.str();
@@ -436,7 +443,7 @@ static void PrintHelp(const vh_params& vhp)
 	cout << "  -t, --text            read FILE in text mode (default)\n";
 	cout << "  -z, --zero            end each output line with NUL, not newline,\n";
 	cout << "                        and disable file name escaping\n";
-	cout << "  -l, --length          set checksum width (allowed values 32 <= 2^n <= 1024)\n";
+	cout << "  -l, --length          set checksum width (allowed values: 32 <= 32*n <= 1024)\n";
 	cout << "      --                this flag terminates the list of OPTIONs, allowing FILE\n";
 	cout << "                        names starting with \"-\" to be used after this flag\n"; 
 	cout << endl;
@@ -833,17 +840,22 @@ int main(int argc, char** argv)
 {
 	vh_params vhp;
 	vhp.cmd = argv[0];
-	// no need to check for "32", it is the default
-	if( vhp.cmd.find("64") != string::npos )
-		vhp.set_hash_width(64);
-	else if( vhp.cmd.find("128") != string::npos )
+	const regex cmdw( "^.*vh([[:d:]]+)sum$" );
+	smatch what;
+	if( regex_match( vhp.cmd, what, cmdw ) )
+	{
+		istringstream iss( what[1] );
+		size_t hw;
+		iss >> hw;
+		if( !vhp.set_hash_width(hw) )
+		{
+			cerr << vhp.cmd << ": invalid length: '" << hw << "'\n";
+			cerr << vhp.cmd << ": length must be a multiple of 32 between 32 and 1024\n";
+			return 1;
+		}
+	}
+	else
 		vhp.set_hash_width(128);
-	else if( vhp.cmd.find("256") != string::npos )
-		vhp.set_hash_width(256);
-	else if( vhp.cmd.find("512") != string::npos )
-		vhp.set_hash_width(512);
-	else if( vhp.cmd.find("1024") != string::npos )
-		vhp.set_hash_width(1024);
 	ostringstream oss;
 	oss << "VH" << vhp.vh_hash_width;
 	vhp.name = oss.str();
@@ -913,7 +925,7 @@ int main(int argc, char** argv)
 						if( !vhp.set_hash_width(hw) )
 						{
 							cerr << vhp.cmd << ": invalid length: '" << hw << "'\n";
-							cerr << vhp.cmd << ": length must be 32, 64, 128, 256, 512, or 1024\n";
+							cerr << vhp.cmd << ": length must be a multiple of 32 between 32 and 1024\n";
 							return 1;
 						}
 						j = arg.length();
@@ -972,7 +984,7 @@ int main(int argc, char** argv)
 				if( !vhp.set_hash_width(hw) )
 				{
 					cerr << vhp.cmd << ": invalid length: '" << hw << "'\n";
-					cerr << vhp.cmd << ": length must be 32, 64, 128, 256, 512, or 1024\n";
+					cerr << vhp.cmd << ": length must be a multiple of 32 between 32 and 1024\n";
 					return 1;
 				}
 			}

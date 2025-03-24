@@ -44,4 +44,15 @@ inline uint32_t fmix32(uint32_t h0, uint32_t h1 = 0xd86b048b)
 	return vh_add(h0, h1);
 }
 
+inline uint32_t pow2roundup(uint32_t x)
+{
+    --x;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return x+1;
+}
+
 #endif

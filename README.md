@@ -18,7 +18,7 @@ versions of the algorithm create identical checksums, results in the fact that
 the minimum blocksize that the algorithm can handle is rather large. So the very
 thing that makes the algorithm extremely fast on larger buffers, creates a lot
 of overhead for very small keys. The algorithm will show its full speed for
-buffers roughly 1-2 kiB and larger.
+buffers roughly a few kiB and larger.
 
 VectorHash has in part been inspired by the PRNG algorithm
 [xoroshiro128++](https://prng.di.unimi.it/) written by David Blackman and
@@ -26,12 +26,12 @@ Sebastiano Vigna (for the core of the hashing function) and
 [MurmurHash3](https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp)
 written by Austin Appleby (for the finalization mix and some support routines).
 
-The algorithm can produce 32-, 64-, 128-, 256-, 512-, or 1024-bit checksums. It
-has been extensively tested against SMHasher written by ZhuReini Urban and all
-versions pass all the tests using commit 83fd13bc of SMHasher, except for the
-speed test. The latter fails because it measures the speed for hashing very
-small keys, which is not what the algorithm is designed for as was already
-explained above. The test harness can be found [in this
+The algorithm can produce checksums for many different widths. It has been
+extensively tested against SMHasher written by ZhuReini Urban for all the widths
+listed below. The code passes all the tests using commit 83fd13bc of SMHasher,
+except for the speed test. The latter fails because it measures the speed for
+hashing very small keys, which is not what the algorithm is designed for as was
+already explained above. The test harness can be found [in this
 repository](https://github.com/rurban/smhasher). The output of the test runs is
 here:
 [32bit](https://gitlab-as.oma.be/-/project/876/uploads/fbe63bb0ce514750edb41e084e539756/test_results_b47ad78c_32bit.txt),
@@ -50,41 +50,42 @@ designed to be a plug-in replacement for other well-known checksum algorithms.
 The actual checksums will be different of course, but the aim is to replicate
 all command line options. This makes it easy to adapt scripts, etc. See the man
 page included in this distribution for a more detailed description of the
-options. In the remaining description only the name vh32sum will be used for
-brevity, but all remarks apply implicitly to the other three executables as
-well.
+options. In the remaining description only the name vh128sum will be used for
+brevity, but all remarks apply implicitly to the other executables as well.
 
-The four executables are in fact identical and are hard links to each other. The
-code determines the width of the checksum by looking at the name of the
-executable. If that name contains the string "32" it will produce a 32-bit
-executable, and similarly for 64-, 128-, 256-, 512-, and 1024-bit checksums.
-Other widths of the checksum are not supported. If it is not possible to
-determine the width of the checksum this way, the width will default to 32 bits.
-It is also possible to force the width with command line flags, e.g. the command
-vh32sum \-l256 will produce a 256-bit checksum.
+The executables are in fact identical and are hard links to each other. The code
+determines the width of the checksum by looking at the name of the executable.
+If that name is of the form "vh\<number\>sum" it will produce a \<number\>-bit
+wide checksum, e.g. an executable named vh256sum will produce a 256-bit wide
+checksum. This works for all supported checksum widths. If it is not possible to
+determine the width of the checksum this way, the width will default to 128
+bits. It is also possible to force the width with command line flags, e.g. the
+command vh128sum \-l256 will produce a 256-bit checksum. Supported lengths are
+any multiple of 32 bits between 32 and 1024. Not all checksum widths have been
+tested against SMHasher. See the previous section for a list of all the tests.
 
-The vh32sum executable can handle multiple file names in a single invocation (as
+The vh128sum executable can handle multiple file names in a single invocation (as
 long as you do not exceed the maximum command-line length of the shell).
 Creating or checking checksums this way will be much faster than invoking
-vh32sum separately for each individual file. So this practise is strongly
+vh128sum separately for each individual file. So this practise is strongly
 recommended.
 
 The code will automatically detect if supported SIMD instructions are available
 and use the highest set available. If you include the \--verbose flag, the code
 will report which SIMD instruction set has been used. You can also override this
-detection with command line options, e.g. vh32sum \--avx512 will force the code
+detection with command line options, e.g. vh128sum \--avx512 will force the code
 to use the AVX512f instruction set, even if the hardware does not support those
 instructions. You will get a crash on an illegal instruction in the latter case.
 These flags are intended for testing and debugging and should not be needed in a
 normal production environment.
 
-The command vh32sum \--help will give a complete overview of all flags that are
+The command vh128sum \--help will give a complete overview of all flags that are
 supported.
 
 The checksums of an empty file are as follows. These can be reproduced with the
 command
 
-	echo -n | vh32sum
+	echo -n | vh128sum -l 32
 
 and similarly for other checksum widths.
 
@@ -94,8 +95,20 @@ and similarly for other checksum widths.
 64 bit:  
 <tt>73711a77d6031b6f</tt>
 
+96 bit:   
+<tt>fdcdf538d6031b6f8a613d7f</tt>
+
 128 bit:   
 <tt>fe82e7d9998e9819c7ac954ea0a0ea8e</tt>
+
+160 bit:   
+<tt>a49af44fdf9952d380d2cb84aace19bf6c0f58c8</tt>
+
+192 bit:   
+<tt>5481034fd2a9074478684acf85dceecd94e0e7830f82775b</tt>
+
+224 bit:   
+<tt>cfd4bf9386cf00766add0e4a30fc6e7ca6cf10f922cdf8e6cc5578ac</tt>
 
 256 bit:   
 <tt>c87638f19f1778d7ee03dddc5c6677fd0701e532d311bfffddfc21c0ece8910a</tt>
@@ -122,10 +135,10 @@ is:
 
 Here the variable <tt>buf</tt> is a pointer to the buffer that should be
 checksummed, <tt>len</tt> is the length of the buffer, <tt>seed</tt> is the seed
-for the checksum algorithm (use 0xfd4c799d to replicate the behavior of vh32sum,
+for the checksum algorithm (use 0xfd4c799d to replicate the behavior of vh128sum,
 etc, but any other value is fine too), <tt>out</tt> is a pointer to the buffer
 that will be used to write the checksum into, and <tt>hw</tt> is the width of
-the checksum (allowed values are 32, 64, 128, 256, 512, and 1024). The
+the checksum (allowed values are any multiple of 32 between 32 and 1024). The
 declaration is contained in the header file <tt>vectorhash.h</tt>. A very simple
 program using this library could contain:
 
@@ -162,7 +175,9 @@ aligned, the code will automatically revert to a lower algorithm that does
 support the provided buffer alignment. For instance, if the hardware supports
 AVX512f instructions, but the buffer is aligned on a 16-byte boundary, the code
 will actually use the SSE2 version of the algorithm since using the AVX512f or
-AVX2 versions would have resulted in a segmentation violation.
+AVX2 versions would have resulted in a segmentation violation. The SSE2 version
+is significantly slower than the AVX512f version, so this situation is best
+avoided, though the results will always be correct.
 
 In Linux, <tt>malloc()</tt> will typically return buffers aligned on a 16-byte
 boundary, so special measures are needed to obtain buffers on a 32- or 64-byte
