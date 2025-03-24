@@ -44,14 +44,14 @@ here:
 ### Command line routines
 
 After building and installing the code (see the separate file INSTALL.md for
-this) you will have six executables called vh32sum, vh64sum, vh128sum, vh256sum,
-vh512sum, and vh1024sum. These can produce checksums of any given file. They are
-designed to be a plug-in replacement for other well-known checksum algorithms.
-The actual checksums will be different of course, but the aim is to replicate
-all command line options. This makes it easy to adapt scripts, etc. See the man
-page included in this distribution for a more detailed description of the
-options. In the remaining description only the name vh128sum will be used for
-brevity, but all remarks apply implicitly to the other executables as well.
+this) you will have three executables called vh128sum, vh256sum, and vh512sum.
+These can produce checksums of any given file. They are designed to be a plug-in
+replacement for other well-known checksum algorithms. The actual checksums will
+be different of course, but the aim is to replicate all command line options.
+This makes it easy to adapt scripts, etc. See the man page included in this
+distribution for a more detailed description of the options. In the remaining
+description only the name vh128sum will be used for brevity, but all remarks
+apply implicitly to the other executables as well.
 
 The executables are in fact identical and are hard links to each other. The code
 determines the width of the checksum by looking at the name of the executable.

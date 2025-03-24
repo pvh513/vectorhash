@@ -14,11 +14,10 @@ type:
 
 	make -j16
 
-The build will create six executables called vh32sum, vh64sum, vh128sum,
-vh256sum, vh512sum, and vh1024sum. These are hard-linked to each other, so they
-really only take up the space of one executable. The Makefile is set up to use
-the GNU compiler g++. It is straightforward to use the LLVM compiler clang++
-instead:
+The build will create three executables called vh128sum, vh256sum, and
+vh512sum. These are hard-linked to each other, so they really only take up the
+space of one executable. The Makefile is set up to use the GNU compiler g++.
+It is straightforward to use the LLVM compiler clang++ instead:
 
 	make -j16 CXX=clang++
 
