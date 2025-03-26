@@ -61,7 +61,7 @@ void EXT(VectorHashBody512)(const v16si*, v16si[], v16si[], v16si[], v16si[])
 }
 #endif
 
-void EXT(VectorHash512)(const void* buffer, size_t len, uint32_t seed, void* out)
+void EXT(VectorHash512)(const void* buffer, size_t len, uint32_t seed, void* out, size_t hw)
 {
 	v16si h1[nreg512], h2[nreg512], h3[nreg512], h4[nreg512];
 	stateinit( (uint32_t*)h1, seed, vh_nint );
@@ -86,5 +86,5 @@ void EXT(VectorHash512)(const void* buffer, size_t len, uint32_t seed, void* out
 	uint32_t* z2 = (uint32_t*)h2;
 	uint32_t* z3 = (uint32_t*)h3;
 	uint32_t* z4 = (uint32_t*)h4;
-	EXT(VectorHashFinalize)(len, z1, z2, z3, z4, out);
+	EXT(VectorHashFinalize)(len, z1, z2, z3, z4, out, hw);
 }

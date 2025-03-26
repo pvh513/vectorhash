@@ -39,7 +39,7 @@ endif
 
 all: default
 
-default: bin/vh32sum bin/vh64sum bin/vh128sum bin/vh256sum bin/vh512sum bin/vh1024sum lib64/libvhsum.a
+default: bin/vh128sum bin/vh256sum bin/vh512sum lib64/libvhsum.a
 
 lib32: lib32/libvhsum.a
 
@@ -55,34 +55,22 @@ clean: testclean
 	rm -f lib32/*/*.o
 	rm -f lib64/libvhsum.a
 	rm -f lib32/libvhsum.a
-	rm -f bin/vh32sum
-	rm -f bin/vh64sum
 	rm -f bin/vh128sum
 	rm -f bin/vh256sum
 	rm -f bin/vh512sum
-	rm -f bin/vh1024sum
 
 distclean: clean
 	cd unittest-cpp; \
 	$(MAKE) clean
 
-bin/vh32sum: lib64/vectorhash.o lib64/libvhsum.a
+bin/vh128sum: lib64/vectorhash.o lib64/libvhsum.a
 	$(CXX) lib64/vectorhash.o $(LDFLAGS) -o $@
 
-bin/vh64sum: bin/vh32sum
-	ln -f bin/vh32sum bin/vh64sum
+bin/vh256sum: bin/vh128sum
+	ln -f bin/vh128sum bin/vh256sum
 
-bin/vh128sum: bin/vh32sum
-	ln -f bin/vh32sum bin/vh128sum
-
-bin/vh256sum: bin/vh32sum
-	ln -f bin/vh32sum bin/vh256sum
-
-bin/vh512sum: bin/vh32sum
-	ln -f bin/vh32sum bin/vh512sum
-
-bin/vh1024sum: bin/vh32sum
-	ln -f bin/vh32sum bin/vh1024sum
+bin/vh512sum: bin/vh128sum
+	ln -f bin/vh128sum bin/vh512sum
 
 unittest-cpp/lib64/libUnitTest++.a:
 	cd unittest-cpp; \
@@ -110,14 +98,11 @@ install:
 	mkdir -p $(INSTALLDIR)/include
 	cp -af src/vectorhash.h $(INSTALLDIR)/include
 	mkdir -p $(INSTALLDIR)/man/man1
-	cp -af man/vh32sum.1 $(INSTALLDIR)/man/man1
+	cp -af man/vh128sum.1 $(INSTALLDIR)/man/man1
 	cd $(INSTALLDIR)/man/man1; \
-	$(GZIP) vh32sum.1; \
-	ln -s vh32sum.1$(GZEXT) vh64sum.1$(GZEXT); \
-	ln -s vh32sum.1$(GZEXT) vh128sum.1$(GZEXT); \
-	ln -s vh32sum.1$(GZEXT) vh256sum.1$(GZEXT); \
-	ln -s vh32sum.1$(GZEXT) vh512sum.1$(GZEXT); \
-	ln -s vh32sum.1$(GZEXT) vh1024sum.1$(GZEXT)
+	$(GZIP) vh128sum.1; \
+	ln -s vh128sum.1$(GZEXT) vh256sum.1$(GZEXT); \
+	ln -s vh128sum.1$(GZEXT) vh512sum.1$(GZEXT)
 	mkdir -p $(INSTALLDIR)/man/man3
 	cp -af man/VectorHash.3 $(INSTALLDIR)/man/man3
 	cd $(INSTALLDIR)/man/man3; \

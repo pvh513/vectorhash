@@ -7,6 +7,7 @@
 //  Distributed under the "zlib license". See the accompanying LICENSE file.
 //-------------------------------------------------------------------------------
 
+#include <iostream>
 #include <vector>
 #include "vectorhash_priv.h"
 #include "vectorhash_core.h"
@@ -19,7 +20,7 @@ inline size_t operator "" _z (unsigned long long n)
 //-----------------------------------------------------------------------------
 // Finalization mix - force all bits of a hash block to avalanche
 
-void EXT(VectorHashFinalize)(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out)
+void EXT(VectorHashFinalize)(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h3, uint32_t* h4, void* out, size_t hw)
 {
 	uint32_t lenc = fmix32(len & 0x7fffffff);
 
@@ -99,8 +100,20 @@ void EXT(VectorHashFinalize)(size_t len, uint32_t* h1, uint32_t* h2, uint32_t* h
 		lc_nstate /= 2;
 	}
 
+	size_t nw = hw/32;
+	if( nw < vh_nstate )
+	{
+		if( nw < vh_nstate/2 )
+		{
+			cerr << "Internal error: impossible value for hash width\n";
+			exit(1);
+		}
+		for( size_t i=0; i < nw; ++i )
+			lres[i] = fmix32(lres[i], lres[i+vh_nstate-nw]);
+	}
+
 	uint32_t* res = (uint32_t*)out;
-	for( size_t i=0; i < vh_nstate; i++ )
+	for( size_t i=0; i < nw; i++ )
 		res[i] = lres[i];
 }
 
