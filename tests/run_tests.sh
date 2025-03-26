@@ -152,6 +152,12 @@ check_error_msg "../bin/vh256sum -l64 tost0000 -- --arg '' test0000" ": --arg: N
 check_error_msg "../bin/vh256sum -l64 tost0000 -- --arg '' test0000" ": '': No such file or directory"
 check_error_msg "../bin/vh256sum -l64 tost0000 -b -- --arg '' test0000" "73711a77d6031b6f \*test0000"
 
+# test widths that are not a power of 2
+check_error_msg "../bin/vh256sum -l96 t0 test0000" "fdcdf538d6031b6f8a613d7f  test0000"
+check_error_msg "../bin/vh256sum -l160 t0 test0000" "a49af44fdf9952d380d2cb84aace19bf6c0f58c8  test0000"
+check_error_msg "../bin/vh256sum -l192 t0 test0000" "5481034fd2a9074478684acf85dceecd94e0e7830f82775b  test0000"
+check_error_msg "../bin/vh256sum -l224 t0 test0000" "cfd4bf9386cf00766add0e4a30fc6e7ca6cf10f922cdf8e6cc5578ac  test0000"
+
 check_error_msg "../bin/vh256sum -l64 -G" "invalid option -- 'G'"
 check_error_msg "../bin/vh256sum -l64 --ver" "unrecognized option '--ver'"
 check_error_msg "../bin/vh256sum -l64 -l sum" "invalid length: 'sum'"

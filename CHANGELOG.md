@@ -20,8 +20,8 @@ SMHasher written by ZhuReini Urban (except for the small key speed test). Since
 testing against SMHasher is not fully complete, it may happen that checksums
 change during the beta tesing phase. Once beta testing is complete, version
 number v1.0 will be created as the first official release. From that point
-onwards backward compatibility will be guaranteed and the checksums will not
-change (at least for versions v1.x).
+onwards backward compatibility will be guaranteed and the checksums will stay
+the same (at least for versions v1.x).
 
 ### Version History
 
@@ -42,3 +42,10 @@ change (at least for versions v1.x).
 - Add support for building 32-bit libraries on 64-bit operating systems.
 
 #### Release v0.4 was created on 16 Feb 2025.
+
+- Add support for additional checksum widths. Now all widths that are
+  a multiple of 32 between 32 and 1024 are supported. Not all widths
+  will be tested against SMHasher, but this will be done for all widths
+  up to 256, as well as 512 and 1024.
+
+#### Release v0.5 was created on 26 Mar 2025.
