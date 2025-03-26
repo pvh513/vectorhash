@@ -7,8 +7,10 @@ LDFLAGS = -lUnitTest++ -lvhsum
 ifeq ($(MAKECMDGOALS),check32)
   CXXFLAGS += -m32
   LDFLAGS += -L../unittest-cpp/lib32 -L../lib32 -m32
+  STATICLIB = ../lib32/libvhsum.a
 else
   LDFLAGS += -L../unittest-cpp/lib64 -L../lib64
+  STATICLIB = ../lib64/libvhsum.a
 endif
 
 all: check64
@@ -33,5 +35,9 @@ clean:
 %.o: %.cpp TestMain.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-TestMain: TestMain.o TestScalar.o TestSSE2.o TestAVX2.o TestAVX512f.o
+TestMain: TestMain.o TestCore.o TestScalar.o TestSSE2.o TestAVX2.o TestAVX512f.o $(STATICLIB)
 	$(CXX) $^ $(LDFLAGS) -o TestMain
+
+../lib32/libvhsum.a:
+
+../lib64/libvhsum.a:
