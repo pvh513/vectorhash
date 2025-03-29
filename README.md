@@ -17,8 +17,26 @@ instructions work on very wide registers, combined with the requirement that all
 versions of the algorithm create identical checksums, results in the fact that
 the minimum blocksize that the algorithm can handle is rather large. So the very
 thing that makes the algorithm extremely fast on larger buffers, creates a lot
-of overhead for very small keys. The algorithm will show its full speed for
-buffers roughly a few kiB and larger.
+of overhead for very small keys. The algorithm will show good speed for buffers
+roughly 16--32 kiB and larger. A more detailed breakdown of the speed of the
+algorithm can be seen below.
+
+<div style="text-align: center;">
+<img src="./speedtest.png" width="50%"/>
+</div>
+
+This image shows the bulk speed of the algorithm (in GiB/s) as a function of the
+buffer size. The latter is shown as the base-2 logarithm of the size in kiB, so
+the left-most point in the plot is for a buffer of 2<sup>0</sup> = 1 kiB and the
+right-most point for a buffer of 2<sup>12</sup> = 4096 kiB = 4 MiB. Curves are
+shown for all 4 versions of the algorithm: scalar, SSE2, AVX2, and AVX512f. It
+can be seen that the scalar and SSE2 versions have nearly identical speeds,
+while the AVX2 and AVX512f versions give considerable speedups. For the AVX2 and
+AVX512f versions, the speed peaks for a buffer size of 512 kiB and then drops
+substantially for larger buffers. Most likely this is caused by the size of the
+CPU cache: for very large buffers the speed is limited by direct memory access,
+while for smaller buffers it is limited by the speed of the CPU cache. These
+tests were carried out on an Intel(R) Xeon(R) Gold 6226R CPU @ 2.90GHz.
 
 VectorHash has in part been inspired by the PRNG algorithm
 [xoroshiro128++](https://prng.di.unimi.it/) written by David Blackman and
