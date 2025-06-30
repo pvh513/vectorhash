@@ -184,7 +184,7 @@ The routine <tt>VectorHash</tt> will automatically determine the hardware
 capabilities of the processor and use the appropriate version of the algorithm.
 However, there is one caveat. Assuming your processor supports AVX512f
 instructions, it will need to read 512 bits of data at once from memory. For
-this the memory address (and hence also the start of the buffer) will need to
+this the memory address (and hence also the start of the buffer) will need to be
 aligned on a 512-bit = 64-byte boundary (in other words, the last 6 bits of the
 buffer address need to be zero). For AVX2 instructions 32-byte alignment is
 needed, and for SSE2 instructions 16-byte alignment. The scalar version can work
@@ -199,7 +199,9 @@ avoided, though the results will always be correct.
 
 In Linux, <tt>malloc()</tt> will typically return buffers aligned on a 16-byte
 boundary, so special measures are needed to obtain buffers on a 32- or 64-byte
-boundary. See [this
+boundary. The same holds for C++ operators like new or memory allocated in C++
+container types as they use the same underlying memory pool. For memory
+allocated on the stack even 16-byte alignment is not guaranteed. See [this
 page](https://embeddedartistry.com/blog/2017/02/22/generating-aligned-memory/)
 for a detailed discussion of how to obtain correctly aligned memory.
 
@@ -207,7 +209,8 @@ for a detailed discussion of how to obtain correctly aligned memory.
 
 VectorHash is distributed with a [zlib open-source software
 license](https://opensource.org/licenses/Zlib). You are free to change and
-redistribute the software. There is NO WARRANTY, to the extent permitted by law.
+redistribute the software as long as the copyright license is maintained. There
+is NO WARRANTY, to the extent permitted by law.
 
 ### The cpuid library
 

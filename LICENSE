@@ -22,3 +22,8 @@ p.vanhoof@oma.be
 
 This is an Open Source License as approved by the Open Source Initiative, 
 see https://opensource.org/licenses/Zlib for details.
+
+This copyright license pertains to all files in this distribution, except
+for anything contained in the cpuid/ and unittest-cpp/ subdirectories.
+The latter are governed by their own separate copyright licenses. See the
+files cpuid/LICENSE.rst and unittest-cpp/LICENSE for details.
