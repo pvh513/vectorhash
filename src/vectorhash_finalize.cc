@@ -12,7 +12,7 @@
 #include "vectorhash_priv.h"
 #include "vectorhash_core.h"
 
-inline size_t operator "" _z (unsigned long long n)
+inline size_t operator ""_z (unsigned long long n)
 {
 	return n;
 }
