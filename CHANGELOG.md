@@ -12,16 +12,14 @@ will be detected automatically during runtime.
 
 ### Release Strategy
 
-The initial development will be aimed at finalizing the main functionality of the code
-and doing more advanced tests in order to flush out the remaining bugs. During
-this time beta releases will be created with version numbers v0.x. The aim is,
-amongst other things, to run a clean test suite for all checksum widths against
-SMHasher written by ZhuReini Urban (except for the small key speed test). Since
-testing against SMHasher is not fully complete, it may happen that checksums
-change during the beta tesing phase. Once beta testing is complete, version
-number v1.0 will be created as the first official release. From that point
-onwards backward compatibility will be guaranteed and the checksums will stay
-the same (at least for versions v1.x).
+Versions v0.x follow the initial development of the code that was aimed at
+finalizing the main functionality of the code. The aim was, amongst other
+things, to run a clean test suite for all supported checksum widths that are a
+power of 2 against SMHasher written by ZhuReini Urban (except for the small key
+speed test). This development is now complete and version v1.0 has been created
+as the first official release. From this point onwards backward compatibility
+will be guaranteed and the checksums will stay the same (at least for versions
+v1.x).
 
 ### Version History
 
@@ -49,3 +47,7 @@ the same (at least for versions v1.x).
   up to 256, as well as 512 and 1024.
 
 #### Release v0.5 was created on 26 Mar 2025.
+
+- Finalize the documentation.
+
+#### Release v1.0 was created on 12 Apr 2026.
