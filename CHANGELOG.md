@@ -14,12 +14,11 @@ will be detected automatically during runtime.
 
 Versions v0.x follow the initial development of the code that was aimed at
 finalizing the main functionality of the code. The aim was, amongst other
-things, to run a clean test suite for all supported checksum widths that are a
-power of 2 against SMHasher written by ZhuReini Urban (except for the small key
-speed test). This development is now complete and version v1.0 has been created
-as the first official release. From this point onwards backward compatibility
-will be guaranteed and the checksums will stay the same (at least for versions
-v1.x).
+things, to run a clean test suite for a selected set of checksum widths against
+SMHasher written by ZhuReini Urban. See the README file for more details. This
+development is now complete and version v1.0 has been created as the first
+official release. From this point onwards backward compatibility will be
+guaranteed and the checksums will stay the same (at least for versions v1.x).
 
 ### Version History
 

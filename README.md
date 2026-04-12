@@ -52,12 +52,16 @@ hashing very small keys, which is not what the algorithm is designed for as was
 already explained above. The test harness can be found [in this
 repository](https://github.com/rurban/smhasher). The output of the test runs is
 here:
-[32bit](https://gitlab-as.oma.be/-/project/876/uploads/fbe63bb0ce514750edb41e084e539756/test_results_b47ad78c_32bit.txt),
-[64bit](https://gitlab-as.oma.be/-/project/876/uploads/986b5d192f4a10c99d747946af5eab75/test_results_061162a3_64bit.txt),
-[128bit](https://gitlab-as.oma.be/-/project/876/uploads/24045262a738d56a503362a224cb3ab7/test_results_83fd13bc_128bit.txt),
-[256bit](https://gitlab-as.oma.be/-/project/876/uploads/e1c89df1dd45314d975e7108e495cd5a/test_results_83fd13bc_256bit.txt),
-[512bit](https://gitlab-as.oma.be/-/project/876/uploads/4c137ca1af293c22be639a68fa056add/test_results_83fd13bc_512bit.txt),
-[1024bit](https://gitlab-as.oma.be/-/project/876/uploads/98be7f8ff5bfc89119bebf185aa287f9/test_results_83fd13bc_1024bit.txt).
+[32bit](https://gitlab-as.oma.be/-/project/876/uploads/df1fdf1da4d3d89fa6b1e30ea581d831/test_results_v1.0_32bit.txt),
+[64bit](https://gitlab-as.oma.be/-/project/876/uploads/51c25fc5b5b05480a5324bcb8de857c6/test_results_v1.0_64bit.txt),
+[96bit](https://gitlab-as.oma.be/-/project/876/uploads/2b09dffff73ff07217703b2a41dc0a5c/test_results_v1.0_96bit.txt),
+[128bit](https://gitlab-as.oma.be/-/project/876/uploads/656fc6555fffcfa56f0592fbadd64f8d/test_results_v1.0_128bit.txt),
+[160bit](https://gitlab-as.oma.be/-/project/876/uploads/bc4a089acde079baa854a234f0d12354/test_results_v1.0_160bit.txt),
+[192bit](https://gitlab-as.oma.be/-/project/876/uploads/2caf1884915025aa5abc6bd07ec121a0/test_results_v1.0_192bit.txt),
+[224bit](https://gitlab-as.oma.be/-/project/876/uploads/3b43648216037ff5f1896e04445b09c6/test_results_v1.0_224bit.txt),
+[256bit](https://gitlab-as.oma.be/-/project/876/uploads/ecf2c66de7faeeb077291c937d19bb4f/test_results_v1.0_256bit.txt),
+[512bit](https://gitlab-as.oma.be/-/project/876/uploads/af5609c5ac414e3bcdc7a23a350ac5da/test_results_v1.0_512bit.txt),
+[1024bit](https://gitlab-as.oma.be/-/project/876/uploads/60d84a7037cfb5b6f12c41ef4577db8d/test_results_v1.0_1024bit.txt).
 
 ### Command line routines
 
