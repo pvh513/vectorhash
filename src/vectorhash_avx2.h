@@ -1,7 +1,7 @@
 //-------------------------------------------------------------------------------
 //  VectorHash - a very fast hash function optimized using SIMD instructions
 //
-//  Copyright (c) 2018-2025 Peter A.M. van Hoof
+//  Copyright (c) 2018-2026 Peter A.M. van Hoof
 //  All Rights Reserved
 //
 //  Distributed under the "zlib license". See the accompanying LICENSE file.
