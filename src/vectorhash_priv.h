@@ -17,7 +17,7 @@
 
 using namespace std;
 
-static const string vh_version( "1.0" );
+static const string vh_version( "1.1" );
 
 #undef VH_INTEL
 #ifdef MSVC

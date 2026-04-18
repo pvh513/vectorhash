@@ -1,19 +1,12 @@
 .PHONY: all default lib32 testclean clean distclean check check32 install
 
 CXX = g++
-CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops
-LDFLAGS = -lvhsum -Llib64
+CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops -fpic
+LDFLAGS = -l:libvhsum.so.1 -Llib64
 
 INSTALLDIR = /usr/local
 LIBDIR64 = lib64
 LIBDIR32 = lib
-
-RANLIB := ${shell which ranlib}
-ifneq ($(RANLIB),)
-  RANLIB = ranlib
-else
-  RANLIB = ar ts
-endif
 
 GZIP := ${shell which gzip}
 ifneq ($(GZIP),)
@@ -39,9 +32,9 @@ endif
 
 all: default
 
-default: bin/vh128sum bin/vh256sum bin/vh512sum lib64/libvhsum.a
+default: bin/vh128sum bin/vh256sum bin/vh512sum lib64/libvhsum.so
 
-lib32: lib32/libvhsum.a
+lib32: lib32/libvhsum.so
 
 testclean:
 	cd tests; \
@@ -53,8 +46,8 @@ clean: testclean
 	rm -f lib64/*/*.o
 	rm -f lib32/*.o
 	rm -f lib32/*/*.o
-	rm -f lib64/libvhsum.a
-	rm -f lib32/libvhsum.a
+	rm -f lib64/libvhsum.so*
+	rm -f lib32/libvhsum.so*
 	rm -f bin/vh128sum
 	rm -f bin/vh256sum
 	rm -f bin/vh512sum
@@ -63,7 +56,7 @@ distclean: clean
 	cd unittest-cpp; \
 	$(MAKE) clean
 
-bin/vh128sum: lib64/vectorhash.o lib64/libvhsum.a
+bin/vh128sum: lib64/vectorhash.o lib64/libvhsum.so
 	$(CXX) lib64/vectorhash.o $(LDFLAGS) -o $@
 
 bin/vh256sum: bin/vh128sum
@@ -80,11 +73,11 @@ unittest-cpp/lib32/libUnitTest++.a:
 	cd unittest-cpp; \
 	$(MAKE) lib32
 
-check: unittest-cpp/lib64/libUnitTest++.a lib64/libvhsum.a
+check: unittest-cpp/lib64/libUnitTest++.a lib64/libvhsum.so
 	cd tests; \
 	$(MAKE)
 
-check32: unittest-cpp/lib32/libUnitTest++.a lib32/libvhsum.a
+check32: unittest-cpp/lib32/libUnitTest++.a lib32/libvhsum.so
 	cd tests; \
 	$(MAKE) check32
 
@@ -92,9 +85,9 @@ install:
 	mkdir -p $(INSTALLDIR)/bin
 	cp -af bin/vh*sum $(INSTALLDIR)/bin
 	mkdir -p $(INSTALLDIR)/$(LIBDIR64)
-	cp -af lib64/libvhsum.a $(INSTALLDIR)/$(LIBDIR64)
+	cp -af lib64/libvhsum.so* $(INSTALLDIR)/$(LIBDIR64)
 	mkdir -p $(INSTALLDIR)/$(LIBDIR32)
-	cp -af lib32/libvhsum.a $(INSTALLDIR)/$(LIBDIR32) 2> /dev/null || :
+	cp -af lib32/libvhsum.so* $(INSTALLDIR)/$(LIBDIR32) 2> /dev/null || :
 	mkdir -p $(INSTALLDIR)/include
 	cp -af src/vectorhash.h $(INSTALLDIR)/include
 	mkdir -p $(INSTALLDIR)/man/man1

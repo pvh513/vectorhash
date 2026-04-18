@@ -47,8 +47,8 @@ make_deps_sub () {
 cxx=$1
 cxxflags=$2
 
-lib64="lib64/libvhsum.a:"
-lib32="lib32/libvhsum.a:"
+lib64="lib64/libvhsum.so:"
+lib32="lib32/libvhsum.so:"
 
 counter=""
 
@@ -73,9 +73,9 @@ do
 	make_deps "$file" "$deps"
 done
 echo -e "$lib64"
-echo -e "\tar cr lib64/libvhsum.a \$^"
-echo -e "\t\$(RANLIB) lib64/libvhsum.a"
+echo -e "\t\$(CXX) \$(CXXFLAGS) -shared -o lib64/libvhsum.so.1 \$^"
+echo -e "\tln -sf libvhsum.so.1 lib64/libvhsum.so"
 echo
 echo -e "$lib32"
-echo -e "\tar cr lib32/libvhsum.a \$^"
-echo -e "\t\$(RANLIB) lib32/libvhsum.a"
+echo -e "\t\$(CXX) \$(CXXFLAGS) -shared -o lib32/libvhsum.so.1 \$^"
+echo -e "\tln -sf libvhsum.so.1 lib32/libvhsum.so"

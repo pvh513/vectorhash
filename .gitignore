@@ -1,7 +1,7 @@
 *.o
 *.d
 *~
-libvhsum.a
+libvhsum.so*
 tests/TestMain
 unittest-cpp/TestUnitTest++
 libUnitTest++.a
