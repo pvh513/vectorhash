@@ -18,18 +18,6 @@
 #include <regex>
 #include <vector>
 
-#if defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
-#include <unistd.h>
-#else
-#define _POSIX_MAPPED_FILES 0
-#endif
-
-#if _POSIX_MAPPED_FILES > 0
-#include <sys/mman.h>
-#endif
-
-#include <fcntl.h>
-
 // O_BINARY is not defined on systems where there
 // is no distinction between binary and text I/O.
 #ifndef O_BINARY
@@ -37,129 +25,7 @@
 #endif
 
 #include "vectorhash_priv.h"
-#include "vectorhash_core.h"
-#include "vectorhash_finalize.h"
-#include "vectorhash_avx512.h"
-#include "vectorhash_avx2.h"
-#include "vectorhash_sse2.h"
-#include "vectorhash_scalar.h"
-
-static string SIMDname[] = { "Scalar", "SSE2", "AVX2", "AVX512" };
-
-struct vh_params {
-	string cmd;
-	string name;
-	bool lgBSDstyle;
-	bool lgCheckMode;
-	bool lgIgnoreMissing;
-	bool lgBinarySet;
-	bool lgTextSet;
-	bool lgBinary;
-	bool lgQuiet;
-	bool lgStatusOnly;
-	bool lgStrict;
-	bool lgWarnSyntax;
-	bool lgVerbose;
-	bool lgZero;
-	is_type SIMDversion;
-	int returncode;
-	uint32_t seed;
-	size_t vh_hash_width;
-	size_t vh_virtreg_width;
-	size_t vh_nstate;
-	size_t vh_nhash;
-	size_t vh_nint;
-	size_t blocksize;
-	bool set_hash_width(size_t hw)
-	{
-		// width of the hash (in bits)
-		// this value MUST be a multiple of 32 between 32 and 1024
-		if( hw < 32 || hw > 1024 || (hw & size_t{0x1f}) != 0 )
-			return false;
-		// initially we will compute a hash that is a power of two wide
-		// as a last step that width will be reduced to the requested width
-		vh_hash_width = pow2roundup(hw);
-		// width of the virtual SIMD register supported in VectorHash (in bits)
-		// must be at least as wide as the largest hardware register that is used
-		vh_virtreg_width = ( 2*vh_hash_width > vh_hwreg_width ) ? 2*vh_hash_width : vh_hwreg_width;
-		// width of the rounded hash in uint32_t elements
-		vh_nstate = vh_hash_width/32;
-		// number of uint32_t's that fit in the virtual register
-		vh_nint = vh_virtreg_width/32;
-		// the file is read with this blocksize (in bytes)
-		blocksize = 4*vh_nint*sizeof(uint32_t);
-		// the actual requested hash width
-		vh_hash_width = hw;
-		// width of the actual hash in uint32_t elements
-		vh_nhash = hw/32;
-		// update the name as well...
-		ostringstream oss;
-		oss << "VH" << vh_hash_width;
-		name = oss.str();
-		return true;
-	}
-	vh_params() : lgBSDstyle(false), lgCheckMode(false), lgIgnoreMissing(false), lgBinarySet(false),
-				  lgTextSet(false), lgBinary(false), lgQuiet(false), lgStatusOnly(false), lgStrict(false),
-				  lgWarnSyntax(false), lgVerbose(false), lgZero(false), SIMDversion(IS_INVALID),
-				  returncode(0), seed(0xfd4c799d)
-	{
-		(void)set_hash_width(32);
-	}
-	char sentinel() const { return lgBinary ? '*' : ' '; }
-	string option() const { return lgBinary ? "rb" : "r"; }
-	void SetSIMDVersion()
-	{
-		// check if SIMD version was already forced by a command line option
-		if( SIMDversion == IS_INVALID )
-		{
-			SIMDversion = GetSIMDVersion();
-			if( lgVerbose )
-			{
-				cout << "found SIMD capability: " << SIMDname[SIMDversion] << "." << endl;
-			}
-		}
-		else {
-			if( lgVerbose )
-			{
-				cout << "SIMD capability was set on the command line to: " << SIMDname[SIMDversion] << "." << endl;
-			}
-		}			
-	}
-};
-
-//-----------------------------------------------------------------------------
-// Platform-specific functions and macros
-
-#if defined(__CYGWIN__)
-// _aligned_malloc / _aligned_free defined in Windows, but not Cygwin, reported by Richard Rudy
-inline int posix_memalign(void **p, size_t a, size_t s)
-{
-	*p = aligned_alloc(s, a);
-	return ( *p == NULL ) ? errno : 0;
-}
-
-inline void posix_memalign_free(void *p)
-{
-	free(p);
-}
-#elif defined(_MSC_VER)
-// posix_memalign not defined on windows
-inline int posix_memalign(void **p, size_t a, size_t s)
-{
-	*p = _aligned_malloc(s, a);
-	return ( *p == NULL ) ? errno : 0;
-}
-
-inline void posix_memalign_free(void *p)
-{
-	_aligned_free(p);
-}
-#else
-inline void posix_memalign_free(void *p)
-{
-	free(p);
-}
-#endif
+#include "vectorhash_binary.h"
 
 struct pstr
 {
@@ -248,34 +114,9 @@ inline string escfn(const string& s)
 
 static string VHstream(const vh_params& vhp, FILE* io)
 {
-	if( fseek( io, 0, SEEK_END ) != 0 )
+	vector<uint32_t> state;
+	if( VectorHashStream(vhp, io, state) != 0 )
 		return string();
-	long fsize = ftell(io);
-	if( fsize < 0 )
-		return string();
-	vector<uint32_t> state(vhp.vh_nstate);
-#if _POSIX_MAPPED_FILES > 0
-	int fd = fileno(io);
-	char* map = ( fsize > 0 ) ? (char*)mmap( NULL, fsize, PROT_READ, MAP_SHARED, fd, 0 ) : nullptr;
-	if( fsize > 0 && map == MAP_FAILED )
-		return string();
-	VectorHash( map, fsize, vhp.seed, state.data(), vhp.SIMDversion, vhp.vh_hash_width );
-	munmap(map, fsize);
-#else
-	if( fseek( io, 0, SEEK_SET ) != 0 )
-		return string();
-	void* map = NULL;
-	if( fsize > 0 )
-	{
-		if( posix_memalign( &map, vh_hwreg_width/8, fsize ) != 0 )
-			return string();
-		if( fread( map, fsize, 1, io ) != 1 )
-			return string();
-	}
-	VectorHash( map, fsize, vhp.seed, state.data(), vhp.SIMDversion, vhp.vh_hash_width );
-	if( map != NULL )
-		posix_memalign_free( map );
-#endif
 
 	ostringstream hash;
 	for( size_t i=0; i < vhp.vh_nhash; ++i )
@@ -286,81 +127,9 @@ static string VHstream(const vh_params& vhp, FILE* io)
 
 static string VHstdin(const vh_params& vhp)
 {
-	void* h1;
-	if( posix_memalign( &h1, vh_hwreg_width/8, vhp.vh_nint*sizeof(uint32_t) ) != 0 )
+	vector<uint32_t> state;
+	if( VectorHashStdin(vhp, state) != 0 )
 		return string();
-	void* h2;
-	if( posix_memalign( &h2, vh_hwreg_width/8, vhp.vh_nint*sizeof(uint32_t) ) != 0 )
-		return string();
-	void* h3;
-	if( posix_memalign( &h3, vh_hwreg_width/8, vhp.vh_nint*sizeof(uint32_t) ) != 0 )
-		return string();
-	void* h4;
-	if( posix_memalign( &h4, vh_hwreg_width/8, vhp.vh_nint*sizeof(uint32_t) ) != 0 )
-		return string();
-
-	uint32_t* z1 = (uint32_t*)h1;
-	uint32_t* z2 = (uint32_t*)h2;
-	uint32_t* z3 = (uint32_t*)h3;
-	uint32_t* z4 = (uint32_t*)h4;
-
-	uint32_t seed = vhp.seed;
-	stateinit( z1, seed, vhp.vh_nint );
-	stateinit( z2, seed, vhp.vh_nint );
-	stateinit( z3, seed, vhp.vh_nint );
-	stateinit( z4, seed, vhp.vh_nint );
-
-	void* map = NULL;
-	if( posix_memalign( &map, vh_hwreg_width/8, vhp.blocksize ) != 0 )
-		return string();
-	vector<uint32_t> state(vhp.vh_nstate);
-	size_t len = 0, bsize;
-	bool lgContinue = true;
-	while( lgContinue )
-	{
-		bsize = fread( map, 1, vhp.blocksize, stdin );
-		if( bsize < vhp.blocksize ) {
-			pad_buffer( (const uint8_t*)map, (uint8_t*)map, bsize, vhp.blocksize );
-			lgContinue = false;
-		}
-		if( vhp.SIMDversion == IS_AVX512 )
-			VectorHashBody512((const v16si*)map, (v16si*)h1, (v16si*)h2, (v16si*)h3, (v16si*)h4, vhp.vh_hash_width);
-		else if( vhp.SIMDversion == IS_AVX2 )
-			VectorHashBody256((const v8si*)map, (v8si*)h1, (v8si*)h2, (v8si*)h3, (v8si*)h4, vhp.vh_hash_width);
-		else if( vhp.SIMDversion == IS_SSE2 )
-			VectorHashBody128((const v4si*)map, (v4si*)h1, (v4si*)h2, (v4si*)h3, (v4si*)h4, vhp.vh_hash_width);
-		else if( vhp.SIMDversion == IS_SCALAR )
-			VectorHashBody32((const uint32_t*)map, (uint32_t*)h1, (uint32_t*)h2, (uint32_t*)h3, (uint32_t*)h4,
-							 vhp.vh_hash_width);
-		else {
-			cerr << "Internal error: impossible value for SIMD version: " << vhp.SIMDversion << "." << endl;
-			exit(1);
-		}
-		len += bsize;
-	}
-	posix_memalign_free( map );
-
-	if( vhp.vh_nstate == 1 )
-		VectorHashFinalize_32(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
-	else if( vhp.vh_nstate == 2 )
-		VectorHashFinalize_64(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
-	else if( vhp.vh_nstate == 4 )
-		VectorHashFinalize_128(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
-	else if( vhp.vh_nstate == 8 )
-		VectorHashFinalize_256(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
-	else if( vhp.vh_nstate == 16 )
-		VectorHashFinalize_512(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
-	else if( vhp.vh_nstate == 32 )
-		VectorHashFinalize_1024(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
-	else {
-		cerr << "Internal error: impossible value for vh_nstate: " << vhp.vh_nstate << "." << endl;
-		exit(1);
-	}
-
-	posix_memalign_free( h4 );
-	posix_memalign_free( h3 );
-	posix_memalign_free( h2 );
-	posix_memalign_free( h1 );
 
 	ostringstream hash;
 	for( size_t i=0; i < vhp.vh_nhash; ++i )

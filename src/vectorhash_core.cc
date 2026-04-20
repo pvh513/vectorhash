@@ -9,10 +9,28 @@
 
 #include <iostream>
 #include <iomanip>
+#include <string>
+#include <vector>
+#include <cstdlib>
+
+#if defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
+#include <unistd.h>
+#else
+#define _POSIX_MAPPED_FILES 0
+#endif
+
+#if _POSIX_MAPPED_FILES > 0
+#include <sys/mman.h>
+#endif
+
+#include <fcntl.h>
+
 #include "../cpuid/cpuinfo.hpp"
 #include "vectorhash.h"
 #include "vectorhash_priv.h"
+#include "vectorhash_binary.h"
 #include "vectorhash_core.h"
+#include "vectorhash_finalize.h"
 #include "vectorhash_avx512.h"
 #include "vectorhash_avx2.h"
 #include "vectorhash_sse2.h"
@@ -226,7 +244,7 @@ static void VectorHash512(const void* buf, size_t len, uint32_t seed, void* out,
 	}
 }
 
-void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hw)
+API_EXPORT void VectorHashSIMD(const void* buf, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hw)
 {
 	auto ibuf = reinterpret_cast<uintptr>(buf);
 	// check if the alignment of the pointer in buf is OK
@@ -257,7 +275,122 @@ void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, is_type S
 	}
 }
 
-void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, size_t hw)
+API_EXPORT void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, size_t hw)
 {
-	VectorHash(buf, len, seed, out, GetSIMDVersion(), hw);
+	VectorHashSIMD(buf, len, seed, out, GetSIMDVersion(), hw);
+}
+
+API_EXPORT int VectorHashStream(const vh_params& vhp, FILE* io, vector<uint32_t>& state)
+{
+	if( fseek( io, 0, SEEK_END ) != 0 )
+		return -1;
+	long fsize = ftell(io);
+	if( fsize < 0 )
+		return -2;
+	state.resize(vhp.vh_nstate);
+#if _POSIX_MAPPED_FILES > 0
+	int fd = fileno(io);
+	char* map = ( fsize > 0 ) ? (char*)mmap( NULL, fsize, PROT_READ, MAP_SHARED, fd, 0 ) : nullptr;
+	if( fsize > 0 && map == MAP_FAILED )
+		return -3;
+	VectorHashSIMD( map, fsize, vhp.seed, state.data(), vhp.SIMDversion, vhp.vh_hash_width );
+	munmap(map, fsize);
+#else
+	if( fseek( io, 0, SEEK_SET ) != 0 )
+		return -1;
+	void* map = NULL;
+	if( fsize > 0 )
+	{
+		if( posix_memalign( &map, vh_hwreg_width/8, fsize ) != 0 )
+			return -10;
+		if( fread( map, fsize, 1, io ) != 1 )
+			return -4;
+	}
+	VectorHashSIMD( map, fsize, vhp.seed, state.data(), vhp.SIMDversion, vhp.vh_hash_width );
+	if( map != NULL )
+		posix_memalign_free( map );
+#endif
+
+	return 0;
+}
+
+API_EXPORT int VectorHashStdin(const vh_params& vhp, vector<uint32_t>& state)
+{
+	void* h1;
+	if( posix_memalign( &h1, vh_hwreg_width/8, vhp.vh_nint*sizeof(uint32_t) ) != 0 )
+		return -10;
+	void* h2;
+	if( posix_memalign( &h2, vh_hwreg_width/8, vhp.vh_nint*sizeof(uint32_t) ) != 0 )
+		return -10;
+	void* h3;
+	if( posix_memalign( &h3, vh_hwreg_width/8, vhp.vh_nint*sizeof(uint32_t) ) != 0 )
+		return -10;
+	void* h4;
+	if( posix_memalign( &h4, vh_hwreg_width/8, vhp.vh_nint*sizeof(uint32_t) ) != 0 )
+		return -10;
+
+	uint32_t* z1 = (uint32_t*)h1;
+	uint32_t* z2 = (uint32_t*)h2;
+	uint32_t* z3 = (uint32_t*)h3;
+	uint32_t* z4 = (uint32_t*)h4;
+
+	uint32_t seed = vhp.seed;
+	stateinit( z1, seed, vhp.vh_nint );
+	stateinit( z2, seed, vhp.vh_nint );
+	stateinit( z3, seed, vhp.vh_nint );
+	stateinit( z4, seed, vhp.vh_nint );
+
+	void* map = NULL;
+	if( posix_memalign( &map, vh_hwreg_width/8, vhp.blocksize ) != 0 )
+		return -10;
+	state.resize(vhp.vh_nstate);
+	size_t len = 0, bsize;
+	bool lgContinue = true;
+	while( lgContinue )
+	{
+		bsize = fread( map, 1, vhp.blocksize, stdin );
+		if( bsize < vhp.blocksize ) {
+			pad_buffer( (const uint8_t*)map, (uint8_t*)map, bsize, vhp.blocksize );
+			lgContinue = false;
+		}
+		if( vhp.SIMDversion == IS_AVX512 )
+			VectorHashBody512((const v16si*)map, (v16si*)h1, (v16si*)h2, (v16si*)h3, (v16si*)h4, vhp.vh_hash_width);
+		else if( vhp.SIMDversion == IS_AVX2 )
+			VectorHashBody256((const v8si*)map, (v8si*)h1, (v8si*)h2, (v8si*)h3, (v8si*)h4, vhp.vh_hash_width);
+		else if( vhp.SIMDversion == IS_SSE2 )
+			VectorHashBody128((const v4si*)map, (v4si*)h1, (v4si*)h2, (v4si*)h3, (v4si*)h4, vhp.vh_hash_width);
+		else if( vhp.SIMDversion == IS_SCALAR )
+			VectorHashBody32((const uint32_t*)map, (uint32_t*)h1, (uint32_t*)h2, (uint32_t*)h3, (uint32_t*)h4,
+							 vhp.vh_hash_width);
+		else {
+			cerr << "Internal error: impossible value for SIMD version: " << vhp.SIMDversion << "." << endl;
+			exit(1);
+		}
+		len += bsize;
+	}
+	posix_memalign_free( map );
+
+	if( vhp.vh_nstate == 1 )
+		VectorHashFinalize_32(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 2 )
+		VectorHashFinalize_64(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 4 )
+		VectorHashFinalize_128(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 8 )
+		VectorHashFinalize_256(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 16 )
+		VectorHashFinalize_512(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else if( vhp.vh_nstate == 32 )
+		VectorHashFinalize_1024(len, z1, z2, z3, z4, state.data(), vhp.vh_hash_width);
+	else {
+		cerr << "Internal error: impossible value for vh_nstate: " << vhp.vh_nstate << "." << endl;
+		exit(1);
+	}
+
+	posix_memalign_free( h4 );
+	posix_memalign_free( h3 );
+	posix_memalign_free( h2 );
+	posix_memalign_free( h1 );
+
+	return 0;
 }

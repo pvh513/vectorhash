@@ -1,7 +1,7 @@
 .PHONY: all default lib32 testclean clean distclean check check32 install
 
 CXX = g++
-CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops -fpic
+CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops -fPIC -fvisibility=hidden
 LDFLAGS = -l:libvhsum.so.1 -Llib64
 
 INSTALLDIR = /usr/local

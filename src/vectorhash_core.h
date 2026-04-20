@@ -11,6 +11,7 @@
 #define VECTORHASH_CORE_H
 
 #include <cstdint>
+#include "vectorhash.h"
 #include "vectorhash_priv.h"
 #include "vectorhash_avx512.h"
 #include "vectorhash_avx2.h"

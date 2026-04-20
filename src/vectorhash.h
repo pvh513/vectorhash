@@ -12,11 +12,18 @@
 
 #include <stdint.h>
 
+// what SIMD instruction sets can the CPU handle?
+typedef enum { IS_INVALID=-1, IS_SCALAR=0, IS_SSE2, IS_AVX2, IS_AVX512 } is_type;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// version where the SIMD support is automatically detected
 void VectorHash(const void* buf, size_t len, uint32_t seed, void* out, size_t hash_width);
+
+// version where you set the SIMD instructions by hand -- usually this is not the routine you want!
+void VectorHashSIMD(const void* buf, size_t len, uint32_t seed, void* out, is_type SIMDversion, size_t hash_width);
 
 #ifdef __cplusplus
 }

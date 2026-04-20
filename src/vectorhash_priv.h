@@ -19,6 +19,8 @@ using namespace std;
 
 static const string vh_version( "1.1" );
 
+#define API_EXPORT __attribute__((visibility("default")))
+
 #undef VH_INTEL
 #ifdef MSVC
 
@@ -32,6 +34,39 @@ static const string vh_version( "1.1" );
 #define VH_INTEL 1
 #endif
 
+#endif
+
+#if defined(__CYGWIN__)
+// _aligned_malloc / _aligned_free defined in Windows, but not Cygwin, reported by Richard Rudy
+inline int posix_memalign(void **p, size_t a, size_t s)
+{
+	*p = aligned_alloc(s, a);
+	return ( *p == NULL ) ? errno : 0;
+}
+
+inline void posix_memalign_free(void *p)
+{
+	free(p);
+}
+#elif defined(_MSC_VER)
+#include <malloc.h>
+
+// posix_memalign not defined on windows
+inline int posix_memalign(void **p, size_t a, size_t s)
+{
+	*p = _aligned_malloc(s, a);
+	return ( *p == NULL ) ? errno : 0;
+}
+
+inline void posix_memalign_free(void *p)
+{
+	_aligned_free(p);
+}
+#else
+inline void posix_memalign_free(void *p)
+{
+	free(p);
+}
 #endif
 
 //-----------------------------------------------------------------------------
@@ -78,9 +113,6 @@ static const size_t vh_nint = vh_virtreg_width/32;
 
 // the file is read with this blocksize (in bytes)
 static const size_t blocksize = 4*vh_nint*sizeof(uint32_t);
-
-// what instruction sets can the CPU handle?
-typedef enum { IS_INVALID=-1, IS_SCALAR=0, IS_SSE2, IS_AVX2, IS_AVX512 } is_type;
 
 // unfortunately uintptr_t is optional, so we cannot rely on that...
 typedef conditional<sizeof(int*) == 8, uint64_t, uint32_t>::type uintptr;
