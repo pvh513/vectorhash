@@ -43,7 +43,7 @@ void stateinit(uint32_t st[], uint32_t& seed, size_t lvh_nint)
 	seed = fmix32(seed);
 }
 
-is_type GetSIMDVersion()
+API_EXPORT is_type GetSIMDVersion()
 {
 #ifdef VH_INTEL
 	// determine which SIMD instruction set should be used to calculate the checksum

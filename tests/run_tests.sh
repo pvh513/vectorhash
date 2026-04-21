@@ -1,6 +1,7 @@
 #!/bin/bash
 
 tempnam='vhtest.tmp.R6sq9'
+export LD_LIBRARY_PATH="$PWD/../lib64"
 
 test_cks_file () {
 	rm -f $tempnam

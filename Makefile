@@ -85,8 +85,10 @@ install:
 	mkdir -p $(INSTALLDIR)/bin
 	cp -af bin/vh*sum $(INSTALLDIR)/bin
 	mkdir -p $(INSTALLDIR)/$(LIBDIR64)
+	strip lib64/libvhsum.so.1
 	cp -af lib64/libvhsum.so* $(INSTALLDIR)/$(LIBDIR64)
 	mkdir -p $(INSTALLDIR)/$(LIBDIR32)
+	strip lib32/libvhsum.so.1 2> /dev/null || :
 	cp -af lib32/libvhsum.so* $(INSTALLDIR)/$(LIBDIR32) 2> /dev/null || :
 	mkdir -p $(INSTALLDIR)/include
 	cp -af src/vectorhash.h $(INSTALLDIR)/include

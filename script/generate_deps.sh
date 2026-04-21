@@ -77,5 +77,5 @@ echo -e "\t\$(CXX) \$(CXXFLAGS) -shared -o lib64/libvhsum.so.1 \$^"
 echo -e "\tln -sf libvhsum.so.1 lib64/libvhsum.so"
 echo
 echo -e "$lib32"
-echo -e "\t\$(CXX) \$(CXXFLAGS) -shared -o lib32/libvhsum.so.1 \$^"
+echo -e "\t\$(CXX) \$(CXXFLAGS) -m32 -shared -o lib32/libvhsum.so.1 \$^"
 echo -e "\tln -sf libvhsum.so.1 lib32/libvhsum.so"
