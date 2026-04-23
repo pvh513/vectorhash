@@ -36,7 +36,8 @@ AVX512f versions, the speed peaks for a buffer size of 512 kiB and then drops
 substantially for larger buffers. Most likely this is caused by the size of the
 CPU cache: for very large buffers the speed is limited by direct memory access,
 while for smaller buffers it is limited by the speed of the CPU cache. These
-tests were carried out on an Intel(R) Xeon(R) Gold 6226R CPU @ 2.90GHz.
+tests were carried out with release v1.1 on an Intel(R) Xeon(R) Gold 6226R CPU
+@ 2.90GHz.
 
 VectorHash has in part been inspired by the PRNG algorithm
 [xoroshiro128++](https://prng.di.unimi.it/) written by David Blackman and
