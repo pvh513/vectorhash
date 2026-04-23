@@ -101,7 +101,8 @@ install:
 	mkdir -p $(INSTALLDIR)/man/man3
 	cp -af man/VectorHash.3 $(INSTALLDIR)/man/man3
 	cd $(INSTALLDIR)/man/man3; \
-	$(GZIP) VectorHash.3
+	$(GZIP) VectorHash.3; \
+	ln -s VectorHash.3$(GZEXT) VectorHashSIMD.3$(GZEXT)
 
 ifneq ($(DEP_GOALS),)
 include Makefile.dep

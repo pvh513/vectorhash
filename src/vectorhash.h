@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 
-// what SIMD instruction sets can the CPU handle?
+// what SIMD instruction set should be used?
 typedef enum { IS_INVALID=-1, IS_SCALAR=0, IS_SSE2, IS_AVX2, IS_AVX512 } is_type;
 
 #ifdef __cplusplus
