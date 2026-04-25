@@ -47,8 +47,24 @@ make_deps_sub () {
 cxx=$1
 cxxflags=$2
 
-lib64="lib64/libvhsum.so:"
-lib32="lib32/libvhsum.so:"
+ver=1
+
+OS=`uname -s`
+
+if [ "${OS}" = "Darwin" ] ; then
+	ext="dylib"
+	nm64="libvhsum.${ver}.${ext}"
+	nm32="libvhsum.${ver}.${ext}"
+	libflags="-dynamiclib -install_name @rpath/libvhsum.${ext}"
+else
+	ext="so"
+	nm64="libvhsum.${ext}.${ver}"
+	nm32="libvhsum.${ext}.${ver}"
+	libflags="-shared"
+fi
+
+lib64="lib64/${nm64}:"
+lib32="lib32/${nm32}:"
 
 counter=""
 
@@ -73,9 +89,27 @@ do
 	make_deps "$file" "$deps"
 done
 echo -e "$lib64"
-echo -e "\t\$(CXX) \$(CXXFLAGS) -shared -o lib64/libvhsum.so.1 \$^"
-echo -e "\tln -sf libvhsum.so.1 lib64/libvhsum.so"
+echo -e "\t\$(CXX) \$(CXXFLAGS) $libflags -o lib64/$nm64 \$^"
+echo -e "\tln -sf $nm64 lib64/libvhsum.${ext}"
 echo
 echo -e "$lib32"
-echo -e "\t\$(CXX) \$(CXXFLAGS) -m32 -shared -o lib32/libvhsum.so.1 \$^"
-echo -e "\tln -sf libvhsum.so.1 lib32/libvhsum.so"
+echo -e "\t\$(CXX) \$(CXXFLAGS) -m32 $libflags -o lib32/$nm32 \$^"
+echo -e "\tln -sf $nm32 lib32/libvhsum.${ext}"
+echo
+echo -e "lib64: lib64/$nm64"
+echo
+echo -e "lib32: lib32/$nm32"
+echo
+echo -e "install-lib:"
+echo -e "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR64)"
+echo -e "\tstrip -x lib64/$nm64"
+echo -e "\tcp -af lib64/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR64)"
+echo -e "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR32)"
+echo -e "\tstrip -x lib32/$nm32 2> /dev/null || :"
+echo -e "\tcp -af lib32/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR32) 2> /dev/null || :"
+echo
+if [ "${OS}" = "Darwin" ] ; then
+	echo -e "LDFLAGS = -lvhsum -Llib64 -Wl,-rpath=\$(INSTALLDIR)/\$(LIBDIR64)"
+else
+	echo -e "LDFLAGS = -l:$nm64 -Llib64"
+fi
