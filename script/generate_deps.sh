@@ -22,11 +22,13 @@ make_deps () {
 
 make_deps_sub () {
 	flag=""
-	case "$2" in
-		*sse2*) flag="-msse2" ;;
-		*avx2*) flag="-mavx2" ;;
-		*avx512*) flag="-mavx512f" ;;
-	esac
+	if [ $cpu = "intel" ] ; then
+		case "$2" in
+			*sse2*) flag="-msse2" ;;
+			*avx2*) flag="-mavx2" ;;
+			*avx512*) flag="-mavx512f" ;;
+		esac
+	fi
 	out=`echo $3 | sed s/:.*//`
 	counter="${counter}="
 	if [ "$counter" == "===" ]; then
@@ -44,12 +46,23 @@ make_deps_sub () {
 	printf "\n"
 }
 
+hardware () {
+	cpu="other"
+	case "$1" in
+		x86*) cpu="intel" ;;
+		amd64) cpu="intel" ;;
+		i?86*) cpu="intel" ;;
+		i86pc) cpu="intel" ;;
+	esac
+}
+
 cxx=$1
 cxxflags=$2
 
 ver=1
 
 OS=`uname -s`
+hardware `uname -m`
 
 if [ "${OS}" = "Darwin" ] ; then
 	ext="dylib"
