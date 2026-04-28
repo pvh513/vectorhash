@@ -186,7 +186,7 @@ and would need to be compiled with a command like this:
     g++ test.cc -lvhsum -L/path/to/libdir
 
 The <tt>-L</tt> parameter is only needed if the library is not installed in a
-directory that is included in your <tt>LD_LIBRARY_PATH</tt>. The library is
+directory that is included in your <tt>LIBRARY_PATH</tt>. The library is
 written in C++, but can also be called from C programs (and even other languages
 like e.g. Fortran) using one additional parameter:
 

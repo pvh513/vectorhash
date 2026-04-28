@@ -12,12 +12,12 @@ make_deps () {
 		lib64="${lib64} lib64/$out"
 		lib32="${lib32} lib32/$out"
 	fi
-	echo "lib64/$2"
-	echo -e "\t\$(CXX) \$(CXXFLAGS) -c $1 -o \$@"
-	echo
-	echo "lib32/$2"
-	echo -e "\t\$(CXX) \$(CXXFLAGS) -c -m32 $1 -o \$@"
-	echo
+	printf "lib64/$2\n"
+	printf "\t\$(CXX) \$(CXXFLAGS) -c $1 -o \$@\n"
+	printf "\n"
+	printf "lib32/$2\n"
+	printf "\t\$(CXX) \$(CXXFLAGS) -c -m32 $1 -o \$@\n"
+	printf "\n"
 }
 
 make_deps_sub () {
@@ -36,12 +36,12 @@ make_deps_sub () {
 	fi
 	lib64="${lib64} lib64/$1/$out"
 	lib32="${lib32} lib32/$1/$out"
-	echo "lib64/$1/$3"
-	echo -e "\t\$(CXX) \$(CXXFLAGS) -c -D$1 $flag $2 -o \$@"
-	echo
-	echo "lib32/$1/$3"
-	echo -e "\t\$(CXX) \$(CXXFLAGS) -c -m32 -D$1 $flag $2 -o \$@"
-	echo
+	printf "lib64/$1/$3\n"
+	printf "\t\$(CXX) \$(CXXFLAGS) -c -D$1 $flag $2 -o \$@\n"
+	printf "\n"
+	printf "lib32/$1/$3\n"
+	printf "\t\$(CXX) \$(CXXFLAGS) -c -m32 -D$1 $flag $2 -o \$@\n"
+	printf "\n"
 }
 
 cxx=$1
@@ -88,28 +88,28 @@ do
 	deps=`$cxx $cxxflags -MM $file`
 	make_deps "$file" "$deps"
 done
-echo -e "$lib64"
-echo -e "\t\$(CXX) \$(CXXFLAGS) $libflags -o lib64/$nm64 \$^"
-echo -e "\tln -sf $nm64 lib64/libvhsum.${ext}"
-echo
-echo -e "$lib32"
-echo -e "\t\$(CXX) \$(CXXFLAGS) -m32 $libflags -o lib32/$nm32 \$^"
-echo -e "\tln -sf $nm32 lib32/libvhsum.${ext}"
-echo
-echo -e "lib64: lib64/$nm64"
-echo
-echo -e "lib32: lib32/$nm32"
-echo
-echo -e "install-lib:"
-echo -e "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR64)"
-echo -e "\tstrip -x lib64/$nm64"
-echo -e "\tcp -af lib64/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR64)"
-echo -e "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR32)"
-echo -e "\tstrip -x lib32/$nm32 2> /dev/null || :"
-echo -e "\tcp -af lib32/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR32) 2> /dev/null || :"
-echo
+printf "$lib64\n"
+printf "\t\$(CXX) \$(CXXFLAGS) $libflags -o lib64/$nm64 \$^\n"
+printf "\tln -sf $nm64 lib64/libvhsum.${ext}\n"
+printf "\n"
+printf "$lib32\n"
+printf "\t\$(CXX) \$(CXXFLAGS) -m32 $libflags -o lib32/$nm32 \$^\n"
+printf "\tln -sf $nm32 lib32/libvhsum.${ext}\n"
+printf "\n"
+printf "lib64: lib64/$nm64\n"
+printf "\n"
+printf "lib32: lib32/$nm32\n"
+printf "\n"
+printf "install-lib:\n"
+printf "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR64)\n"
+printf "\tstrip -x lib64/$nm64\n"
+printf "\tcp -af lib64/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR64)\n"
+printf "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR32)\n"
+printf "\tstrip -x lib32/$nm32 2> /dev/null || :\n"
+printf "\tcp -af lib32/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR32) 2> /dev/null || :\n"
+printf "\n"
 if [ "${OS}" = "Darwin" ] ; then
-	echo -e "LDFLAGS = -lvhsum -Llib64 -Wl,-rpath=\$(INSTALLDIR)/\$(LIBDIR64)"
+	printf "LDFLAGS = -lvhsum -Llib64 -Wl,-rpath=\$(INSTALLDIR)/\$(LIBDIR64)\n"
 else
-	echo -e "LDFLAGS = -l:$nm64 -Llib64"
+	printf "LDFLAGS = -l:$nm64 -Llib64\n"
 fi

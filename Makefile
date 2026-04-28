@@ -86,14 +86,14 @@ install: install-lib
 	mkdir -p $(INSTALLDIR)/man/man1
 	cp -af man/vh128sum.1 $(INSTALLDIR)/man/man1
 	cd $(INSTALLDIR)/man/man1; \
-	$(GZIP) vh128sum.1; \
-	ln -s vh128sum.1$(GZEXT) vh256sum.1$(GZEXT); \
-	ln -s vh128sum.1$(GZEXT) vh512sum.1$(GZEXT)
+	$(GZIP) -f vh128sum.1; \
+	ln -sf vh128sum.1$(GZEXT) vh256sum.1$(GZEXT); \
+	ln -sf vh128sum.1$(GZEXT) vh512sum.1$(GZEXT)
 	mkdir -p $(INSTALLDIR)/man/man3
 	cp -af man/VectorHash.3 $(INSTALLDIR)/man/man3
 	cd $(INSTALLDIR)/man/man3; \
-	$(GZIP) VectorHash.3; \
-	ln -s VectorHash.3$(GZEXT) VectorHashSIMD.3$(GZEXT)
+	$(GZIP) -f VectorHash.3; \
+	ln -sf VectorHash.3$(GZEXT) VectorHashSIMD.3$(GZEXT)
 
 ifneq ($(DEP_GOALS),)
 include Makefile.dep
