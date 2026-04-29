@@ -26,12 +26,14 @@ ifeq ($(MAKECMDGOALS),)
 endif
 
 ifneq ($(DEP_GOALS),)
-  $(shell script/generate_deps.sh "$(CXX)" "$(CXXFLAGS)" "$(INSTALLDIR)" "$(LIBDIR64)" "$(LIBDIR32)" > Makefile.dep)
+  $(shell test ! -f Makefile.dep && script/generate_deps.sh "$(CXX)" "$(CXXFLAGS)" > Makefile.dep)
 endif
 
 all: default
 
-default: bin/vh128sum bin/vh256sum bin/vh512sum lib64
+-include Makefile.dep
+
+default: bin/vh128sum bin/vh256sum bin/vh512sum $(LIB64NAME)
 
 testclean:
 	cd tests; \
@@ -53,7 +55,7 @@ distclean: clean
 	cd unittest-cpp; \
 	$(MAKE) clean
 
-bin/vh128sum: lib64/vectorhash.o lib64
+bin/vh128sum: lib64/vectorhash.o $(LIB64NAME)
 	$(CXX) lib64/vectorhash.o $(LDFLAGS) -o $@
 
 bin/vh256sum: bin/vh128sum
@@ -70,11 +72,11 @@ unittest-cpp/lib32/libUnitTest++.a:
 	cd unittest-cpp; \
 	$(MAKE) lib32
 
-check: unittest-cpp/lib64/libUnitTest++.a lib64
+check: unittest-cpp/lib64/libUnitTest++.a $(LIB64NAME)
 	cd tests; \
 	$(MAKE)
 
-check32: unittest-cpp/lib32/libUnitTest++.a lib32
+check32: unittest-cpp/lib32/libUnitTest++.a $(LIB32NAME)
 	cd tests; \
 	$(MAKE) check32
 
@@ -94,7 +96,3 @@ install: install-lib
 	cd $(INSTALLDIR)/man/man3; \
 	$(GZIP) -f VectorHash.3; \
 	ln -sf VectorHash.3$(GZEXT) VectorHashSIMD.3$(GZEXT)
-
-ifneq ($(DEP_GOALS),)
-include Makefile.dep
-endif

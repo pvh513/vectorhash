@@ -66,14 +66,18 @@ hardware `uname -m`
 
 if [ "${OS}" = "Darwin" ] ; then
 	ext="dylib"
+	sflag="-x"
 	nm64="libvhsum.${ver}.${ext}"
 	nm32="libvhsum.${ver}.${ext}"
-	libflags="-dynamiclib -install_name @rpath/libvhsum.${ext}"
+	libflags64="-dynamiclib -install_name @rpath/$nm64"
+	libflags32="-dynamiclib -install_name @rpath/$nm32"
 else
 	ext="so"
+	sflag=""
 	nm64="libvhsum.${ext}.${ver}"
 	nm32="libvhsum.${ext}.${ver}"
-	libflags="-shared"
+	libflags64="-shared"
+	libflags32="-shared"
 fi
 
 lib64="lib64/${nm64}:"
@@ -81,6 +85,20 @@ lib32="lib32/${nm32}:"
 
 counter=""
 
+printf "LIB64NAME = lib64/$nm64\n"
+printf "\n"
+printf "LIB32NAME = lib32/$nm32\n"
+printf "\n"
+if [ "${OS}" = "Darwin" ] ; then
+	printf "LDFLAGS = -lvhsum -Llib64 -Wl,-rpath,@executable_path/../lib64\n"
+else
+	printf "LDFLAGS = -l:$nm64 -Llib64\n"
+fi
+printf "\n"
+printf "lib64: \$(LIB64NAME)\n"
+printf "\n"
+printf "lib32: \$(LIB32NAME)\n"
+printf "\n"
 for file in src/*.cc
 do
 	multibuild=`grep -l 'EXT(' $file`
@@ -102,27 +120,19 @@ do
 	make_deps "$file" "$deps"
 done
 printf "$lib64\n"
-printf "\t\$(CXX) \$(CXXFLAGS) $libflags -o lib64/$nm64 \$^\n"
+printf "\t\$(CXX) \$(CXXFLAGS) $libflags64 -o lib64/$nm64 \$^\n"
 printf "\tln -sf $nm64 lib64/libvhsum.${ext}\n"
 printf "\n"
 printf "$lib32\n"
-printf "\t\$(CXX) \$(CXXFLAGS) -m32 $libflags -o lib32/$nm32 \$^\n"
+printf "\t\$(CXX) \$(CXXFLAGS) -m32 $libflags32 -o lib32/$nm32 \$^\n"
 printf "\tln -sf $nm32 lib32/libvhsum.${ext}\n"
-printf "\n"
-printf "lib64: lib64/$nm64\n"
-printf "\n"
-printf "lib32: lib32/$nm32\n"
 printf "\n"
 printf "install-lib:\n"
 printf "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR64)\n"
-printf "\tstrip -x lib64/$nm64\n"
 printf "\tcp -af lib64/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR64)\n"
+printf "\tcd \$(INSTALLDIR)/\$(LIBDIR64); \\\\\n"
+printf "\tstrip $sflag $nm64\n"
 printf "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR32)\n"
-printf "\tstrip -x lib32/$nm32 2> /dev/null || :\n"
 printf "\tcp -af lib32/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR32) 2> /dev/null || :\n"
-printf "\n"
-if [ "${OS}" = "Darwin" ] ; then
-	printf "LDFLAGS = -lvhsum -Llib64 -Wl,-rpath=\$(INSTALLDIR)/\$(LIBDIR64)\n"
-else
-	printf "LDFLAGS = -l:$nm64 -Llib64\n"
-fi
+printf "\tcd \$(INSTALLDIR)/\$(LIBDIR32); \\\\\n"
+printf "\tstrip $sflag $nm32 2> /dev/null || :\n"

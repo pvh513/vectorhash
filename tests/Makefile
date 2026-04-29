@@ -13,10 +13,10 @@ VHSUMLOC64 = $(shell realpath ../lib64)
 
 ifeq ($(MAKECMDGOALS),check32)
   CXXFLAGS += -m32
-  LDFLAGS += -L../unittest-cpp/lib32 -L../lib32 -m32 -Wl,-rpath=$(VHSUMLOC32)
+  LDFLAGS += -L../unittest-cpp/lib32 -L../lib32 -m32 -Wl,-rpath,$(VHSUMLOC32)
   SHAREDLIB = ../lib32/libvhsum.so
 else
-  LDFLAGS += -L../unittest-cpp/lib64 -L../lib64 -Wl,-rpath=$(VHSUMLOC64)
+  LDFLAGS += -L../unittest-cpp/lib64 -L../lib64 -Wl,-rpath,$(VHSUMLOC64)
   SHAREDLIB = ../lib64/libvhsum.so
 endif
 
