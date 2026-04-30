@@ -47,13 +47,25 @@ make_deps_sub () {
 }
 
 hardware () {
-	cpu="other"
 	case "$1" in
-		x86*) cpu="intel" ;;
-		amd64) cpu="intel" ;;
-		i?86*) cpu="intel" ;;
-		i86pc) cpu="intel" ;;
+		x86*|amd64|i?86*|i86pc)
+			cpu="intel"
+			;;
+		*)
+			cpu="other"
+			;;
 	esac
+}
+
+installdirs () {
+	libdir64="lib"
+	libdir32="lib"
+	if [ -d /usr/lib64 ] ; then
+		libdir64="lib64"
+	fi
+	if [ -d /usr/lib32 ] ; then
+		libdir32="lib32"
+	fi
 }
 
 cxx=$1
@@ -63,6 +75,7 @@ ver=1
 
 OS=`uname -s`
 hardware `uname -m`
+installdirs
 
 if [ "${OS}" = "Darwin" ] ; then
 	ext="dylib"
@@ -85,12 +98,16 @@ lib32="lib32/${nm32}:"
 
 counter=""
 
+printf "LIB64DIR = $libdir64\n"
+printf "\n"
+printf "LIB32DIR = $libdir32\n"
+printf "\n"
 printf "LIB64NAME = lib64/$nm64\n"
 printf "\n"
 printf "LIB32NAME = lib32/$nm32\n"
 printf "\n"
 if [ "${OS}" = "Darwin" ] ; then
-	printf "LDFLAGS = -lvhsum -Llib64 -Wl,-rpath,@executable_path/../lib64\n"
+	printf "LDFLAGS = -lvhsum -Llib64 -Wl,-rpath,@executable_path/../\${LIB64DIR}\n"
 else
 	printf "LDFLAGS = -l:$nm64 -Llib64\n"
 fi
@@ -128,11 +145,11 @@ printf "\t\$(CXX) \$(CXXFLAGS) -m32 $libflags32 -o lib32/$nm32 \$^\n"
 printf "\tln -sf $nm32 lib32/libvhsum.${ext}\n"
 printf "\n"
 printf "install-lib:\n"
-printf "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR64)\n"
-printf "\tcp -af lib64/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR64)\n"
-printf "\tcd \$(INSTALLDIR)/\$(LIBDIR64); \\\\\n"
+printf "\tmkdir -p \$(INSTALLDIR)/\$(LIB64DIR)\n"
+printf "\tcp -af lib64/libvhsum.* \$(INSTALLDIR)/\$(LIB64DIR)\n"
+printf "\tcd \$(INSTALLDIR)/\$(LIB64DIR); \\\\\n"
 printf "\tstrip $sflag $nm64\n"
-printf "\tmkdir -p \$(INSTALLDIR)/\$(LIBDIR32)\n"
-printf "\tcp -af lib32/libvhsum.* \$(INSTALLDIR)/\$(LIBDIR32) 2> /dev/null || :\n"
-printf "\tcd \$(INSTALLDIR)/\$(LIBDIR32); \\\\\n"
+printf "\tmkdir -p \$(INSTALLDIR)/\$(LIB32DIR)\n"
+printf "\tcp -af lib32/libvhsum.* \$(INSTALLDIR)/\$(LIB32DIR) 2> /dev/null || :\n"
+printf "\tcd \$(INSTALLDIR)/\$(LIB32DIR); \\\\\n"
 printf "\tstrip $sflag $nm32 2> /dev/null || :\n"

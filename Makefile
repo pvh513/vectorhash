@@ -4,8 +4,6 @@ CXX = g++
 CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops -fPIC -fvisibility=hidden
 
 INSTALLDIR = /usr/local
-LIBDIR64 = lib64
-LIBDIR32 = lib
 
 GZIP := ${shell which gzip}
 ifneq ($(GZIP),)
