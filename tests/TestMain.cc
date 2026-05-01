@@ -20,22 +20,14 @@ int main ()
 {
 	void *buffer_raw = malloc((1<<20) + 63);
 
-	// make sure bufffer is aligned on a 64-byte boundary
+	// make sure buffer is aligned on a 64-byte boundary
 	uintptr ibuf = reinterpret_cast<uintptr>(buffer_raw);
 	uintptr mask = 0x3f;
 	ibuf = (ibuf+63)&(~mask);
 	buffer = reinterpret_cast<void*>(ibuf);
 
 	// determine SIMD capability, this determines which tests can be run
-	cpuid::cpuinfo m_cpuid;
-	if( m_cpuid.has_avx512_f() )
-		SIMDversion = IS_AVX512;
-	else if( m_cpuid.has_avx2() )
-		SIMDversion = IS_AVX2;
-	else if( m_cpuid.has_sse2() )
-		SIMDversion = IS_SSE2;
-	else
-		SIMDversion = IS_SCALAR;
+	SIMDversion = GetSIMDVersion();
 
 	int retval = UnitTest::RunAllTests();
 
