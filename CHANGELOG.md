@@ -50,3 +50,8 @@ guaranteed and the checksums will stay the same (at least for versions v1.x).
 - Finalize the documentation.
 
 #### Release v1.0 was created on 12 Apr 2026.
+
+- Generate a shared object library instead of a static library.
+- Improve support for macOS.
+
+#### Release v1.1 was created on 1 May 2026.

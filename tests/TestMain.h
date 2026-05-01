@@ -16,7 +16,7 @@
 #include <fstream>
 #include <UnitTest++/UnitTest++.h>
 #include "vectorhash.h"
-#include "vectorhash_priv.h"
+#include "vectorhash_core.h"
 
 using namespace std;
 

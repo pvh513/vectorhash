@@ -36,7 +36,8 @@ AVX512f versions, the speed peaks for a buffer size of 512 kiB and then drops
 substantially for larger buffers. Most likely this is caused by the size of the
 CPU cache: for very large buffers the speed is limited by direct memory access,
 while for smaller buffers it is limited by the speed of the CPU cache. These
-tests were carried out on an Intel(R) Xeon(R) Gold 6226R CPU @ 2.90GHz.
+tests were carried out with release v1.1 on an Intel(R) Xeon(R) Gold 6226R CPU
+@ 2.90GHz.
 
 VectorHash has in part been inspired by the PRNG algorithm
 [xoroshiro128++](https://prng.di.unimi.it/) written by David Blackman and
@@ -44,14 +45,14 @@ Sebastiano Vigna (for the core of the hashing function) and
 [MurmurHash3](https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp)
 written by Austin Appleby (for the finalization mix and some support routines).
 
-The algorithm can produce checksums for many different widths. It has been
-extensively tested against SMHasher written by ZhuReini Urban for all the widths
-listed below. The code passes all the tests using commit 83fd13bc of SMHasher,
-except for the speed test. The latter fails because it measures the speed for
-hashing very small keys, which is not what the algorithm is designed for as was
-already explained above. The test harness can be found [in this
-repository](https://github.com/rurban/smhasher). The output of the test runs is
-here:
+The algorithm can produce checksums for many different widths (any multiple of
+32 bits between 32 and 1024 bits). It has been extensively tested against
+SMHasher written by ZhuReini Urban for all the widths listed below. The code
+passes all the tests using commit 83fd13bc of SMHasher, except for the speed
+test. The latter fails because it measures the speed for hashing very small
+keys, which is not what the algorithm is designed for as was already explained
+above. The test harness can be found [in this repository](https://github.com/rurban/smhasher).
+The output of the test runs is here:
 [32bit](https://gitlab-as.oma.be/-/project/876/uploads/df1fdf1da4d3d89fa6b1e30ea581d831/test_results_v1.0_32bit.txt),
 [64bit](https://gitlab-as.oma.be/-/project/876/uploads/51c25fc5b5b05480a5324bcb8de857c6/test_results_v1.0_64bit.txt),
 [96bit](https://gitlab-as.oma.be/-/project/876/uploads/2b09dffff73ff07217703b2a41dc0a5c/test_results_v1.0_96bit.txt),
@@ -86,10 +87,10 @@ command vh128sum \-l256 will produce a 256-bit checksum. Supported lengths are
 any multiple of 32 bits between 32 and 1024. Not all checksum widths have been
 tested against SMHasher. See the previous section for a list of all the tests.
 
-The vh128sum executable can handle multiple file names in a single invocation (as
-long as you do not exceed the maximum command-line length of the shell).
+The vh128sum executable can handle multiple file names in a single invocation
+(as long as you do not exceed the maximum command-line length of the shell).
 Creating or checking checksums this way will be much faster than invoking
-vh128sum separately for each individual file. So this practise is strongly
+vh128sum separately for each individual file. So this practice is strongly
 recommended.
 
 The code will automatically detect if supported SIMD instructions are available
@@ -148,21 +149,28 @@ and similarly for other checksum widths.
 ### The libvhsum library
 
 After building and installing the code you will have a 64-bit (and/or 32-bit)
-static library called <tt>libvhsum.a</tt>. This library exports a routine that
-will allow you to perform a checksum on a buffer. The declaration for the call
-is:
+shared library called <tt>libvhsum.so</tt>. This is a symbolic link to a
+versioned library called <tt>libvhsum.so.n</tt> where <tt>n</tt> is the major
+version number of the release (e.g., <tt>libvhsum.so.1</tt>). Different releases
+of the library with the same major version number will be backward compatible.
+This library exports two routines that will allow you to perform a checksum on a
+buffer. The declaration for the call is:
 
     #include <vectorhash.h>
     void VectorHash(const void *buf, size_t len, uint32_t seed, void *out, size_t hw);
+    void VectorHashSIMD(const void *buf, size_t len, uint32_t seed, void *out, is_type SIMDtype, size_t hw);
 
 Here the variable <tt>buf</tt> is a pointer to the buffer that should be
 checksummed, <tt>len</tt> is the length of the buffer, <tt>seed</tt> is the seed
-for the checksum algorithm (use 0xfd4c799d to replicate the behavior of vh128sum,
-etc, but any other value is fine too), <tt>out</tt> is a pointer to the buffer
-that will be used to write the checksum into, and <tt>hw</tt> is the width of
-the checksum (allowed values are any multiple of 32 between 32 and 1024). The
-declaration is contained in the header file <tt>vectorhash.h</tt>. A very simple
-program using this library could contain:
+for the checksum algorithm (use 0xfd4c799d to replicate the behavior of
+vh128sum, etc, but any other value is fine too), <tt>out</tt> is a pointer to
+the buffer that will be used to write the checksum into, and <tt>hw</tt> is the
+width of the checksum in bits (allowed values are any multiple of 32 between 32
+and 1024). The routine VectorHashSIMD() allows you to specify the SIMD
+instruction set to be used (allowed values are: IS_SCALAR, IS_SSE2, IS_AVX2, and
+IS_AVX512). This version should not normally be used, but can be helpful for
+e.g. speed tests. The declaration is contained in the header file
+<tt>vectorhash.h</tt>. A very simple program using this library could contain:
 
     #include <vectorhash.h>
     // ...
@@ -178,7 +186,7 @@ and would need to be compiled with a command like this:
     g++ test.cc -lvhsum -L/path/to/libdir
 
 The <tt>-L</tt> parameter is only needed if the library is not installed in a
-directory that is included in your <tt>LD_LIBRARY_PATH</tt>. The library is
+directory that is included in your <tt>LIBRARY_PATH</tt>. The library is
 written in C++, but can also be called from C programs (and even other languages
 like e.g. Fortran) using one additional parameter:
 
@@ -199,7 +207,13 @@ AVX512f instructions, but the buffer is aligned on a 16-byte boundary, the code
 will actually use the SSE2 version of the algorithm since using the AVX512f or
 AVX2 versions would have resulted in a segmentation violation. The SSE2 version
 is significantly slower than the AVX512f version, so this situation is best
-avoided, though the results will always be correct.
+avoided, though the results will always be correct. Note that the routine
+<tt>VectorHashSIMD()</tt> also carries out this test on the buffer alignment, so
+if you e.g. instruct <tt>VectorHashSIMD()</tt> to use the AVX2 instruction set,
+but supply a 16-byte aligned buffer, the routine will actually use the SSE2
+instruction set. On the other hand, <tt>VectorHashSIMD()</tt> will not test the
+hardware capabilities of the processor, so this routine can crash if you select
+a SIMD instruction set that is not supported by the processor.
 
 In Linux, <tt>malloc()</tt> will typically return buffers aligned on a 16-byte
 boundary, so special measures are needed to obtain buffers on a 32- or 64-byte

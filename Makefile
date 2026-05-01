@@ -1,19 +1,9 @@
-.PHONY: all default lib32 testclean clean distclean check check32 install
+.PHONY: all default lib32 lib64 testclean clean distclean check check32 install install-lib
 
 CXX = g++
-CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops
-LDFLAGS = -lvhsum -Llib64
+CXXFLAGS = -g -W -Wall -Wno-unused-command-line-argument -ansi -std=c++11 -O3 -funroll-loops -fPIC -fvisibility=hidden
 
 INSTALLDIR = /usr/local
-LIBDIR64 = lib64
-LIBDIR32 = lib
-
-RANLIB := ${shell which ranlib}
-ifneq ($(RANLIB),)
-  RANLIB = ranlib
-else
-  RANLIB = ar ts
-endif
 
 GZIP := ${shell which gzip}
 ifneq ($(GZIP),)
@@ -34,14 +24,14 @@ ifeq ($(MAKECMDGOALS),)
 endif
 
 ifneq ($(DEP_GOALS),)
-  $(shell script/generate_deps.sh "$(CXX)" "$(CXXFLAGS)" > Makefile.dep)
+  $(shell test ! -f Makefile.dep && script/generate_deps.sh "$(CXX)" "$(CXXFLAGS)" > Makefile.dep)
 endif
 
 all: default
 
-default: bin/vh128sum bin/vh256sum bin/vh512sum lib64/libvhsum.a
+-include Makefile.dep
 
-lib32: lib32/libvhsum.a
+default: bin/vh128sum bin/vh256sum bin/vh512sum $(LIB64NAME)
 
 testclean:
 	cd tests; \
@@ -53,8 +43,8 @@ clean: testclean
 	rm -f lib64/*/*.o
 	rm -f lib32/*.o
 	rm -f lib32/*/*.o
-	rm -f lib64/libvhsum.a
-	rm -f lib32/libvhsum.a
+	rm -f lib64/libvhsum.*
+	rm -f lib32/libvhsum.*
 	rm -f bin/vh128sum
 	rm -f bin/vh256sum
 	rm -f bin/vh512sum
@@ -63,7 +53,7 @@ distclean: clean
 	cd unittest-cpp; \
 	$(MAKE) clean
 
-bin/vh128sum: lib64/vectorhash.o lib64/libvhsum.a
+bin/vh128sum: lib64/vectorhash.o $(LIB64NAME)
 	$(CXX) lib64/vectorhash.o $(LDFLAGS) -o $@
 
 bin/vh256sum: bin/vh128sum
@@ -80,34 +70,27 @@ unittest-cpp/lib32/libUnitTest++.a:
 	cd unittest-cpp; \
 	$(MAKE) lib32
 
-check: unittest-cpp/lib64/libUnitTest++.a lib64/libvhsum.a
+check: unittest-cpp/lib64/libUnitTest++.a $(LIB64NAME)
 	cd tests; \
 	$(MAKE)
 
-check32: unittest-cpp/lib32/libUnitTest++.a lib32/libvhsum.a
+check32: unittest-cpp/lib32/libUnitTest++.a $(LIB32NAME)
 	cd tests; \
 	$(MAKE) check32
 
-install:
+install: install-lib
 	mkdir -p $(INSTALLDIR)/bin
 	cp -af bin/vh*sum $(INSTALLDIR)/bin
-	mkdir -p $(INSTALLDIR)/$(LIBDIR64)
-	cp -af lib64/libvhsum.a $(INSTALLDIR)/$(LIBDIR64)
-	mkdir -p $(INSTALLDIR)/$(LIBDIR32)
-	cp -af lib32/libvhsum.a $(INSTALLDIR)/$(LIBDIR32) 2> /dev/null || :
 	mkdir -p $(INSTALLDIR)/include
 	cp -af src/vectorhash.h $(INSTALLDIR)/include
 	mkdir -p $(INSTALLDIR)/man/man1
 	cp -af man/vh128sum.1 $(INSTALLDIR)/man/man1
 	cd $(INSTALLDIR)/man/man1; \
-	$(GZIP) vh128sum.1; \
-	ln -s vh128sum.1$(GZEXT) vh256sum.1$(GZEXT); \
-	ln -s vh128sum.1$(GZEXT) vh512sum.1$(GZEXT)
+	$(GZIP) -f vh128sum.1; \
+	ln -sf vh128sum.1$(GZEXT) vh256sum.1$(GZEXT); \
+	ln -sf vh128sum.1$(GZEXT) vh512sum.1$(GZEXT)
 	mkdir -p $(INSTALLDIR)/man/man3
 	cp -af man/VectorHash.3 $(INSTALLDIR)/man/man3
 	cd $(INSTALLDIR)/man/man3; \
-	$(GZIP) VectorHash.3
-
-ifneq ($(DEP_GOALS),)
-include Makefile.dep
-endif
+	$(GZIP) -f VectorHash.3; \
+	ln -sf VectorHash.3$(GZEXT) VectorHashSIMD.3$(GZEXT)
